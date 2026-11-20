@@ -34,6 +34,10 @@
 
     // Itens recentes (até 5)
     const list = A.$("#recent-list");
+    if (A.isLoadingRemote && A.isLoadingRemote()) {
+      list.innerHTML = '<div class="empty-state">⏳ Carregando seus dados…</div>';
+      return;
+    }
     if (!posts.length) {
       list.innerHTML =
         '<div class="empty-state">Nenhum conteúdo salvo ainda.<br>' +
