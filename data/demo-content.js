@@ -142,10 +142,10 @@ const DEMO_CONTENT = {
 
   /* ---------- Planos (hipotéticos — nada é cobrado) ---------- */
   plans: [
-    { id: "free", label: "Free", limit: 5 },
-    { id: "starter", label: "Starter", limit: 50 },
-    { id: "pro", label: "Pro", limit: 150 },
-    { id: "premium", label: "Premium", limit: 300 }
+    { id: "free", label: "Free", limit: 5, businesses: 1 },
+    { id: "starter", label: "Starter", limit: 50, businesses: 1 },
+    { id: "pro", label: "Pro", limit: 150, businesses: 3 },
+    { id: "premium", label: "Premium", limit: 300, businesses: 5 }
   ],
 
   /* ---------- Modelos de legenda por objetivo ----------
