@@ -1,291 +1,290 @@
-// =========================================================
-// SocialFlow AI — Edge Function: generate-content (Etapa 7)
-// ---------------------------------------------------------
-// Esta função roda NO SERVIDOR (Supabase Edge Functions).
-// A chave da Gemini API fica nos Secrets do servidor e
-// NUNCA é enviada ao navegador.
-// =========================================================
+/* =========================================================
+   SocialFlow AI — Conexão com o Supabase (supabase-client.js)
+   ---------------------------------------------------------
+   Se você ainda não preencheu o supabase-config.js, o app
+   continua funcionando normalmente no modo demonstração local.
+   ========================================================= */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const SFSupabase = (function () {
+  let client = null;
+  let cachedUser = null;
+  let cachedBusinessId = null;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const PLAN_LIMITS: Record<string, number> = {
-  free: 5,
-  starter: 50,
-  pro: 150,
-  premium: 300,
-};
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
-function cleanText(value: unknown, max = 300): string {
-  return String(value ?? "").trim().slice(0, max);
-}
-
-function buildPrompt(mode: string, business: Record<string, unknown>, input: Record<string, unknown>): string {
-  const nome = cleanText(business.name, 80);
-  const segmento = cleanText(input.niche || business.niche, 60);
-  const publico = cleanText(business.audience, 140);
-  const tom = cleanText(input.tone || business.tone || "profissional", 40);
-  const descricao = cleanText(business.description, 400) || "Não informada";
-  const produto = cleanText(input.product, 80);
-  const objetivo = cleanText(input.goal, 80);
-  const rede = cleanText(input.platform || "Instagram", 40);
-  const formato = cleanText(input.format || "feed", 40);
-
-  if (mode === "caption") {
-    return `Você é especialista em marketing digital e copywriting para pequenos negócios.
-Crie uma publicação adequada às informações fornecidas.
-
-EMPRESA
-Nome: ${nome}
-Segmento: ${segmento}
-Público-alvo: ${publico}
-Tom: ${tom}
-Descrição: ${descricao}
-
-PUBLICAÇÃO
-Rede social: ${rede}
-Produto/serviço: ${produto}
-Objetivo: ${objetivo}
-Formato: ${formato}
-
-Regras:
-1. Escreva em português natural e claro.
-2. Adapte a linguagem ao público e ao canal.
-3. Crie uma abertura interessante, uma mensagem útil e uma chamada para ação.
-4. Não invente preços, descontos, depoimentos, resultados ou características.
-5. Evite promessas garantidas e alegações enganosas.
-6. Não inclua dados pessoais desnecessários.
-
-Retorne SOMENTE um objeto JSON válido com estas chaves exatas:
-{
-  "title": "string",
-  "caption": "string",
-  "cta": "string",
-  "hashtags": "string com hashtags separadas por espaço",
-  "visual": "string com ideia visual"
-}`;
+  function cleanUrl(rawUrl) {
+    try {
+      return new URL((rawUrl || "").trim()).origin;
+    } catch (e) {
+      return "";
+    }
   }
 
-  if (mode === "reels") {
-    return `Você é estrategista de conteúdo para vídeos curtos.
-Crie 5 ideias originais para:
-Empresa: ${nome}
-Segmento: ${segmento}
-Público: ${publico}
-Produto/serviço: ${produto}
-Objetivo: ${objetivo}
-
-As ideias devem ser simples de produzir, adequadas ao segmento e não devem inventar preços, descontos, dados ou resultados garantidos.
-
-Retorne SOMENTE um objeto JSON válido com esta chave exatas:
-{
-  "reels": [
-    {
-      "title": "string",
-      "hook": "string (gancho inicial)",
-      "scenes": ["cena 1", "cena 2", "cena 3", "cena 4"],
-      "screenText": "string (texto na tela)",
-      "caption": "string (legenda)",
-      "cta": "string (chamada para ação)",
-      "hashtags": "string"
-    }
-  ]
-}`;
+  function hasValidConfig() {
+    if (typeof SUPABASE_CONFIG === "undefined") return false;
+    const url = cleanUrl(SUPABASE_CONFIG.url);
+    const key = (SUPABASE_CONFIG.publishableKey || "").trim();
+    return (
+      url.startsWith("https://") &&
+      !url.includes("COLE_") &&
+      key.length > 20 &&
+      !key.includes("COLE_")
+    );
   }
 
-  // mode === "calendar"
-  return `Você é especialista em planejamento de conteúdo para pequenos negócios.
-Monte um calendário de 7 dias para:
-Empresa: ${nome}
-Segmento: ${segmento}
-Público: ${publico}
-Produto/serviço em foco: ${produto}
-Objetivo: ${objetivo}
-
-Alterne entre conteúdo educativo, comercial, informativo e relacionamento.
-Não repita temas, não invente datas comemorativas e não invente preços ou resultados garantidos.
-
-Retorne SOMENTE um objeto JSON válido com esta chave exata (7 itens na lista):
-{
-  "days": [
-    {
-      "day": 1,
-      "type": "Educativo | Comercial | Informativo | Relacionamento",
-      "theme": "string",
-      "idea": "string",
-      "caption": "string",
-      "cta": "string"
-    }
-  ]
-}`;
-}
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  function getClient() {
+    if (client) return client;
+    if (!hasValidConfig() || typeof window.supabase === "undefined") return null;
+    client = window.supabase.createClient(cleanUrl(SUPABASE_CONFIG.url), SUPABASE_CONFIG.publishableKey.trim());
+    return client;
   }
 
-  try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const geminiKey = (Deno.env.get("GEMINI_API_KEY") ?? "").trim();
+  function isEnabled() {
+    return getClient() !== null;
+  }
 
-    if (!geminiKey) {
-      return jsonResponse({ error: "Chave GEMINI_API_KEY não configurada nos Secrets do servidor." }, 500);
-    }
+  // Traduz mensagens comuns de erro do Supabase para português simples
+  function translateError(error) {
+    const msg = (error && error.message ? error.message : "").toLowerCase();
+    if (msg.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
+    if (msg.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar (ou marque Auto Confirm no Supabase).";
+    if (msg.includes("user already registered")) return "Esse e-mail já está cadastrado.";
+    if (msg.includes("password should be at least")) return "A senha deve ter pelo menos 6 caracteres.";
+    if (msg.includes("failed to fetch")) return "Sem conexão com o Supabase. Verifique a internet e a Project URL.";
+    return error && error.message ? error.message : "Erro ao comunicar com o servidor.";
+  }
 
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
+  async function signIn(email, password) {
+    const sb = getClient();
+    const res = await sb.auth.signInWithPassword({ email: email, password: password });
+    if (res.error) throw new Error(translateError(res.error));
+    return res.data.user;
+  }
+
+  async function signUp(name, email, password) {
+    const sb = getClient();
+    const res = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { name: name } }
     });
-
-    const { data: userData, error: userError } = await userClient.auth.getUser();
-    if (userError || !userData.user) {
-      return jsonResponse({ error: "Você precisa estar logado para gerar conteúdo com IA." }, 401);
+    if (res.error) throw new Error(translateError(res.error));
+    if (res.data.user && res.data.session) {
+      await sb.from("profiles").upsert({ id: res.data.user.id, name: name });
     }
-    const user = userData.user;
+    return res.data;
+  }
 
-    const body = await req.json();
-    const mode = body?.mode;
-    const business = body?.business ?? {};
-    const input = body?.input ?? {};
+  async function signOut() {
+    const sb = getClient();
+    cachedUser = null;
+    cachedBusinessId = null;
+    if (sb) await sb.auth.signOut();
+  }
 
-    if (!["caption", "reels", "calendar"].includes(mode)) {
-      return jsonResponse({ error: "Modo de geração inválido." }, 400);
+  async function getUser() {
+    const sb = getClient();
+    if (!sb) return null;
+    const res = await sb.auth.getUser();
+    cachedUser = res.data ? res.data.user : null;
+    return cachedUser;
+  }
+
+  function isLoggedIn() {
+    return Boolean(isEnabled() && cachedUser);
+  }
+
+  function normalizePost(row) {
+    return {
+      id: row.id,
+      title: row.title || "Sem título",
+      content_type: row.content_type || "legenda",
+      platform: row.platform || "Instagram",
+      status: row.status || "rascunho",
+      scheduled_for: row.scheduled_for ? String(row.scheduled_for).slice(0, 10) : "",
+      caption: row.caption || "",
+      cta: row.cta || "",
+      hashtags: row.hashtags || "",
+      visual: row.visual || "",
+      created_at: row.created_at || new Date().toISOString()
+    };
+  }
+
+  async function getMyBusiness() {
+    const sb = getClient();
+    const user = await getUser();
+    if (!sb || !user) return null;
+    const res = await sb
+      .from("businesses")
+      .select("id, name, niche, audience, tone, description")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (res.error) throw new Error(translateError(res.error));
+    const biz = res.data && res.data.length ? res.data[0] : null;
+    cachedBusinessId = biz ? biz.id : null;
+    return biz;
+  }
+
+  async function saveMyBusiness(data) {
+    const sb = getClient();
+    const user = await getUser();
+    if (!sb || !user) throw new Error("Você precisa estar logado para salvar no banco.");
+
+    const existing = await getMyBusiness();
+    const payload = {
+      user_id: user.id,
+      name: data.name,
+      niche: data.niche,
+      audience: data.audience,
+      tone: data.tone,
+      description: data.description || ""
+    };
+
+    if (existing) {
+      const res = await sb.from("businesses").update(payload).eq("id", existing.id).select().single();
+      if (res.error) throw new Error(translateError(res.error));
+      cachedBusinessId = res.data.id;
+      return res.data;
+    } else {
+      const res = await sb.from("businesses").insert(payload).select().single();
+      if (res.error) throw new Error(translateError(res.error));
+      cachedBusinessId = res.data.id;
+      return res.data;
     }
-    if (!cleanText(business.name) || !cleanText(input.product) || !cleanText(input.goal)) {
-      return jsonResponse({ error: "Preencha empresa, produto/serviço e objetivo." }, 400);
+  }
+
+  async function getPosts() {
+    const sb = getClient();
+    const user = await getUser();
+    if (!sb || !user) return [];
+    const res = await sb
+      .from("content_posts")
+      .select("id, title, content_type, platform, caption, cta, hashtags, visual, status, scheduled_for, created_at")
+      .order("created_at", { ascending: false });
+    if (res.error) throw new Error(translateError(res.error));
+    return (res.data || []).map(normalizePost);
+  }
+
+  async function createPost(data) {
+    const sb = getClient();
+    const user = cachedUser || await getUser();
+    if (!sb || !user) return null;
+    if (!cachedBusinessId) {
+      const biz = await getMyBusiness();
+      if (!biz) throw new Error("Cadastre sua empresa em 'Minha empresa' antes de salvar conteúdos.");
     }
+    const payload = {
+      user_id: user.id,
+      business_id: cachedBusinessId,
+      title: data.title || "Sem título",
+      content_type: data.content_type || "legenda",
+      platform: data.platform || "Instagram",
+      caption: data.caption || "",
+      cta: data.cta || "",
+      hashtags: data.hashtags || "",
+      visual: data.visual || "",
+      status: data.status || "rascunho",
+      scheduled_for: data.scheduled_for ? data.scheduled_for + "T12:00:00Z" : null
+    };
+    const res = await sb.from("content_posts").insert(payload).select().single();
+    if (res.error) throw new Error(translateError(res.error));
+    return normalizePost(res.data);
+  }
 
-    // Usa service_role apenas no servidor para ler plano e contar usos do mês
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+  async function updatePost(id, changes) {
+    const sb = getClient();
+    if (!sb || !cachedUser) return null;
+    const payload = {};
+    ["title", "content_type", "platform", "caption", "cta", "hashtags", "visual", "status"].forEach(function (k) {
+      if (changes[k] !== undefined) payload[k] = changes[k];
+    });
+    if (changes.scheduled_for !== undefined) {
+      payload.scheduled_for = changes.scheduled_for ? changes.scheduled_for + "T12:00:00Z" : null;
+    }
+    const res = await sb.from("content_posts").update(payload).eq("id", id).select().single();
+    if (res.error) throw new Error(translateError(res.error));
+    return normalizePost(res.data);
+  }
 
-    const { data: sub } = await adminClient
+  async function deletePost(id) {
+    const sb = getClient();
+    if (!sb || !cachedUser) return false;
+    const res = await sb.from("content_posts").delete().eq("id", id);
+    if (res.error) throw new Error(translateError(res.error));
+    return true;
+  }
+
+  async function generateWithAI(mode, business, input) {
+    const sb = getClient();
+    if (!sb || !cachedUser) throw new Error("Faça login para gerar com IA.");
+    const timeoutPromise = new Promise(function (_, reject) {
+      setTimeout(function () {
+        reject(new Error("Tempo esgotado (45s). Confira se a função 'generate-content' está publicada no Supabase."));
+      }, 45000);
+    });
+    const res = await Promise.race([
+      sb.functions.invoke("generate-content", {
+        body: { mode: mode, business: business, input: input }
+      }),
+      timeoutPromise
+    ]);
+    if (res.error) {
+      let msg = "";
+      try {
+        if (res.error.context && typeof res.error.context.json === "function") {
+          const errBody = await res.error.context.json();
+          msg = errBody && errBody.error ? errBody.error : "";
+        }
+      } catch (e) { /* ignorar */ }
+      if (!msg && String(res.error.message || "").toLowerCase().includes("failed to send")) {
+        msg = "Função de IA ainda não publicada no Supabase (ou sem conexão).";
+      }
+      throw new Error(msg || res.error.message || "Erro ao chamar a IA no servidor.");
+    }
+    return res.data;
+  }
+
+  async function getUsageStatus() {
+    const sb = getClient();
+    const user = cachedUser || await getUser();
+    if (!sb || !user) return null;
+
+    const subRes = await sb
       .from("subscriptions")
       .select("plan")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const plan = sub?.plan && PLAN_LIMITS[sub.plan] ? sub.plan : "free";
-    const limit = PLAN_LIMITS[plan];
-
     const startOfMonth = new Date();
     startOfMonth.setUTCDate(1);
     startOfMonth.setUTCHours(0, 0, 0, 0);
 
-    const { count: usedCount, error: countError } = await adminClient
+    const usageRes = await sb
       .from("usage_events")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .gte("created_at", startOfMonth.toISOString());
 
-    if (countError) {
-      return jsonResponse({ error: "Erro ao verificar limite de uso." }, 500);
-    }
-
-    const used = usedCount ?? 0;
-    if (used >= limit) {
-      return jsonResponse(
-        { error: `Limite mensal do plano ${plan} atingido (${used}/${limit}).` },
-        429
-      );
-    }
-
-    const prompt = buildPrompt(mode, business, input);
-    const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"];
-
-    let geminiRes: Response | null = null;
-    let timedOut = false;
-    for (const model of models) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
-      timedOut = false;
-      try {
-        geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-          {
-            method: "POST",
-            signal: controller.signal,
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": geminiKey,
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json",
-                temperature: 0.7,
-              },
-            }),
-          }
-        );
-      } catch {
-        clearTimeout(timer);
-        timedOut = true;
-        geminiRes = null;
-        continue; // tenta o próximo modelo se este demorar mais de 10s
-      }
-      clearTimeout(timer);
-
-      if (geminiRes.ok || ![404, 429, 503].includes(geminiRes.status)) break;
-    }
-
-    if (!geminiRes || !geminiRes.ok) {
-      if (timedOut && !geminiRes) {
-        return jsonResponse({ error: "A IA demorou muito para responder. Tente novamente em instantes." }, 504);
-      }
-      const status = geminiRes?.status ?? 502;
-      const errText = geminiRes ? await geminiRes.text() : "";
-      console.error("Gemini API error:", status, errText);
-      let googleMsg = "";
-      try {
-        googleMsg = JSON.parse(errText)?.error?.message ?? "";
-      } catch { /* ignorar */ }
-
-      if (status === 429) {
-        return jsonResponse({ error: "Muitas requisições no momento. Aguarde alguns segundos e tente de novo." }, 429);
-      }
-      if (status === 400 || status === 403) {
-        return jsonResponse({ error: `Erro ${status} na Gemini API: ${googleMsg || "verifique a GEMINI_API_KEY nos Segredos."}` }, 502);
-      }
-      return jsonResponse({ error: `Erro ao chamar a IA (código ${status}): ${googleMsg || "veja os Logs no Supabase."}` }, 502);
-    }
-
-    const geminiJson = await geminiRes.json();
-    const rawText = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(rawText);
-    } catch {
-      return jsonResponse({ error: "A resposta da IA veio em formato inesperado. Tente novamente." }, 502);
-    }
-
-    // Registra 1 uso no banco somente após sucesso
-    await adminClient.from("usage_events").insert({
-      user_id: user.id,
-      action: mode,
-    });
-
-    return jsonResponse({
-      ok: true,
-      ai: true,
-      data: parsed,
-      usage: { used: used + 1, limit, plan },
-    });
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    return jsonResponse({ error: "Erro interno no servidor ao gerar conteúdo." }, 500);
+    if (usageRes.error) throw new Error(translateError(usageRes.error));
+    return {
+      plan: (subRes.data && subRes.data.plan) || "free",
+      used: usageRes.count || 0
+    };
   }
-});
+
+  async function deleteAllMyData() {
+    const sb = getClient();
+    const user = cachedUser || await getUser();
+    if (!sb || !user) return;
+    const postsRes = await sb.from("content_posts").delete().eq("user_id", user.id);
+    if (postsRes.error) throw new Error(translateError(postsRes.error));
+    const bizRes = await sb.from("businesses").delete().eq("user_id", user.id);
+    if (bizRes.error) throw new Error(translateError(bizRes.error));
+    cachedBusinessId = null;
+  }
+
+  return {
+    isEnabled, isLoggedIn, signIn, signUp, signOut, getUser,
+    getMyBusiness, saveMyBusiness,
+    getPosts, createPost, updatePost, deletePost,
+    generateWithAI, getUsageStatus, deleteAllMyData
+  };
+})();
