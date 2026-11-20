@@ -108,27 +108,36 @@ const SFSupabase = (function () {
     };
   }
 
-  async function getMyBusiness() {
+  function setActiveBusinessId(id) {
+    cachedBusinessId = id || null;
+  }
+
+  async function getMyBusinesses() {
     const sb = getClient();
     const user = await getUser();
-    if (!sb || !user) return null;
+    if (!sb || !user) return [];
     const res = await sb
       .from("businesses")
       .select("id, name, niche, audience, tone, description")
-      .order("created_at", { ascending: false })
-      .limit(1);
+      .order("created_at", { ascending: true });
     if (res.error) throw new Error(translateError(res.error));
-    const biz = res.data && res.data.length ? res.data[0] : null;
-    cachedBusinessId = biz ? biz.id : null;
-    return biz;
+    const list = res.data || [];
+    if (list.length && !list.some(function (b) { return b.id === cachedBusinessId; })) {
+      cachedBusinessId = list[0].id;
+    }
+    return list;
   }
 
-  async function saveMyBusiness(data) {
+  async function getMyBusiness() {
+    const list = await getMyBusinesses();
+    return list.length ? list[0] : null;
+  }
+
+  async function saveMyBusiness(data, id) {
     const sb = getClient();
     const user = await getUser();
     if (!sb || !user) throw new Error("Você precisa estar logado para salvar no banco.");
 
-    const existing = await getMyBusiness();
     const payload = {
       user_id: user.id,
       name: data.name,
@@ -138,8 +147,8 @@ const SFSupabase = (function () {
       description: data.description || ""
     };
 
-    if (existing) {
-      const res = await sb.from("businesses").update(payload).eq("id", existing.id).select().single();
+    if (id && !String(id).startsWith("id-")) {
+      const res = await sb.from("businesses").update(payload).eq("id", id).select().single();
       if (res.error) throw new Error(translateError(res.error));
       cachedBusinessId = res.data.id;
       return res.data;
@@ -149,6 +158,14 @@ const SFSupabase = (function () {
       cachedBusinessId = res.data.id;
       return res.data;
     }
+  }
+
+  async function deleteMyBusiness(id) {
+    const sb = getClient();
+    if (!sb || !cachedUser || !id || String(id).startsWith("id-")) return;
+    const res = await sb.from("businesses").delete().eq("id", id);
+    if (res.error) throw new Error(translateError(res.error));
+    if (cachedBusinessId === id) cachedBusinessId = null;
   }
 
   async function getPosts() {
@@ -283,7 +300,7 @@ const SFSupabase = (function () {
 
   return {
     isEnabled, isLoggedIn, signIn, signUp, signOut, getUser,
-    getMyBusiness, saveMyBusiness,
+    getMyBusiness, getMyBusinesses, saveMyBusiness, deleteMyBusiness, setActiveBusinessId,
     getPosts, createPost, updatePost, deletePost,
     generateWithAI, getUsageStatus, deleteAllMyData
   };
