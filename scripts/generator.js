@@ -124,6 +124,8 @@ const SFGenerator = (function () {
   }
 
   function renderCaption(result, isAI) {
+    const titleEl = A.$("#caption-result-title");
+    if (titleEl) titleEl.textContent = isAI ? "Resultado gerado por IA" : "Resultado demonstrativo";
     const tag = A.$("#caption-result .tag");
     if (tag) tag.textContent = isAI ? "✨ Gerado por IA · revise antes de publicar" : "Simulado · não é IA";
     const blocks = [
@@ -133,9 +135,16 @@ const SFGenerator = (function () {
       ["Hashtags", result.hashtags],
       ["Ideia visual", result.visual]
     ];
-    A.$("#caption-output").innerHTML = blocks.map(function (b) {
-      return '<div class="result-block"><p class="result-label">' + b[0] + "</p><p>" +
-        A.escapeHtml(b[1]).replace(/\n/g, "<br>") + "</p></div>";
+    A.$("#caption-output").innerHTML = blocks.map(function (b, idx) {
+      return (
+        '<div class="result-block">' +
+          '<div class="result-block-head">' +
+            '<p class="result-label">' + b[0] + "</p>" +
+            '<button type="button" class="btn-copy-inline" data-copy-block="' + idx + '">Copiar</button>' +
+          "</div>" +
+          "<p>" + A.escapeHtml(b[1]).replace(/\n/g, "<br>") + "</p>" +
+        "</div>"
+      );
     }).join("");
     A.$("#caption-result").classList.remove("hidden");
     A.$("#caption-result").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -242,6 +251,8 @@ const SFGenerator = (function () {
   }
 
   function renderReels(reels, isAI) {
+    const titleEl = A.$("#reels-result-title");
+    if (titleEl) titleEl.textContent = isAI ? "Ideias geradas por IA" : "Ideias demonstrativas";
     const tag = A.$("#reels-result .tag");
     if (tag) tag.textContent = isAI ? "✨ Gerado por IA · revise antes de publicar" : "Simulado · não é IA";
     const esc = A.escapeHtml;
@@ -343,6 +354,18 @@ const SFGenerator = (function () {
   A.$("#caption-form").addEventListener("submit", onCaptionSubmit);
   A.$("#caption-copy").addEventListener("click", function () {
     if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult));
+  });
+  if (A.$("#caption-copy-top")) {
+    A.$("#caption-copy-top").addEventListener("click", function () {
+      if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult));
+    });
+  }
+  A.$("#caption-output").addEventListener("click", function (event) {
+    const btn = event.target.closest("[data-copy-block]");
+    if (!btn || !lastCaptionResult) return;
+    const fields = [lastCaptionResult.title, lastCaptionResult.caption, lastCaptionResult.cta, lastCaptionResult.hashtags, lastCaptionResult.visual];
+    const value = fields[Number(btn.dataset.copyBlock)];
+    if (value) A.copyText(value);
   });
   A.$("#caption-save").addEventListener("click", function () {
     if (!lastCaptionResult) return;
