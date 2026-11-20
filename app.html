@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialFlow AI — Aplicação (demonstração)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body class="app">
+
+<div class="app-layout">
+
+  <!-- ===================== MENU LATERAL ===================== -->
+  <aside class="sidebar" id="sidebar" aria-label="Menu da aplicação">
+    <a href="index.html" class="logo" title="Voltar para a página inicial">
+      <span class="logo-icon" aria-hidden="true">≋</span>
+      <span>SocialFlow <strong>AI</strong></span>
+    </a>
+
+    <ul class="nav-list">
+      <li><button class="nav-item" data-view="dashboard"><span class="nav-icon">📊</span>Dashboard</button></li>
+      <li><button class="nav-item" data-view="empresa"><span class="nav-icon">🏪</span>Minha empresa</button></li>
+      <li><button class="nav-item" data-view="legendas"><span class="nav-icon">✍️</span>Gerar legenda</button></li>
+      <li><button class="nav-item" data-view="reels"><span class="nav-icon">🎬</span>Ideias para Reels</button></li>
+      <li><button class="nav-item" data-view="calendario"><span class="nav-icon">📅</span>Calendário</button></li>
+      <li><button class="nav-item" data-view="historico"><span class="nav-icon">🗂️</span>Histórico</button></li>
+      <li><button class="nav-item" data-view="configuracoes"><span class="nav-icon">⚙️</span>Configurações</button></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="usage-box">
+        <p><strong>Plano <span id="usage-plan">Free</span></strong> · simulado</p>
+        <p class="muted"><span id="usage-text">0 de 5</span> gerações este mês</p>
+        <div class="progress"><div class="progress-bar" id="usage-bar"></div></div>
+      </div>
+      <a href="login.html" class="sidebar-logout" id="logout-link">← Trocar conta / Sair</a>
+    </div>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ===================== ÁREA PRINCIPAL ===================== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="btn btn-secondary btn-sm menu-toggle" id="menu-toggle" aria-label="Abrir menu">☰</button>
+      <h1 id="page-title">Dashboard</h1>
+      <span class="business-chip" id="business-chip">Nenhuma empresa cadastrada</span>
+    </header>
+
+    <!-- ========== TELA: DASHBOARD ========== -->
+    <section class="view" id="view-dashboard" data-title="Dashboard">
+      <p class="view-intro">Resumo do seu marketing nesta semana.</p>
+
+      <div class="notice notice-warning hidden" id="dash-no-business">
+        Você ainda não cadastrou sua empresa.
+        <a href="#empresa">Cadastrar agora →</a>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><p class="stat-label">Conteúdos salvos</p><p class="stat-value" id="stat-total">0</p></div>
+        <div class="stat-card"><p class="stat-label">Agendados nesta semana</p><p class="stat-value" id="stat-week">0</p></div>
+        <div class="stat-card"><p class="stat-label">Publicados</p><p class="stat-value" id="stat-published">0</p></div>
+        <div class="stat-card"><p class="stat-label">Gerações disponíveis</p><p class="stat-value" id="stat-left">5</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Atalhos</h2></div>
+        <div class="shortcuts">
+          <a href="#legendas" class="btn btn-primary btn-sm">✍️ Nova legenda</a>
+          <a href="#reels" class="btn btn-secondary btn-sm">🎬 Ideias para Reels</a>
+          <a href="#calendario" class="btn btn-secondary btn-sm">📅 Ver calendário</a>
+          <a href="#empresa" class="btn btn-secondary btn-sm">🏪 Minha empresa</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Itens recentes</h2>
+          <a href="#historico" class="small">Ver histórico completo →</a>
+        </div>
+        <div class="item-list" id="recent-list"></div>
+      </div>
+    </section>
+
+    <!-- ========== TELA: MINHA EMPRESA ========== -->
+    <section class="view" id="view-empresa" data-title="Minha empresa">
+      <p class="view-intro">Essas informações deixam os conteúdos mais adequados ao seu negócio.</p>
+
+      <div class="notice">
+        🔒 Use apenas dados <strong>fictícios ou públicos</strong> do negócio. Não coloque dados pessoais de clientes,
+        senhas ou informações confidenciais. Nesta demonstração, tudo fica salvo apenas neste navegador.
+      </div>
+
+      <form class="card" id="business-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="biz-name">Nome da empresa <span class="required">*</span></label>
+            <input id="biz-name" name="name" maxlength="60" placeholder="Ex.: Barbearia do Centro">
+            <span class="field-error" data-error-for="biz-name"></span>
+          </div>
+
+          <div class="field">
+            <label for="biz-niche">Segmento <span class="required">*</span></label>
+            <select id="biz-niche" name="niche">
+              <option value="">Selecione…</option>
+            </select>
+            <span class="field-error" data-error-for="biz-niche"></span>
+          </div>
+
+          <div class="field">
+            <label for="biz-audience">Público-alvo <span class="required">*</span></label>
+            <input id="biz-audience" name="audience" maxlength="100" placeholder="Ex.: homens de 20 a 40 anos do bairro">
+            <span class="field-error" data-error-for="biz-audience"></span>
+          </div>
+
+          <div class="field">
+            <label for="biz-tone">Tom de voz <span class="required">*</span></label>
+            <select id="biz-tone" name="tone">
+              <option value="">Selecione…</option>
+            </select>
+            <span class="field-error" data-error-for="biz-tone"></span>
+          </div>
+
+          <div class="field field-full">
+            <label for="biz-description">Descrição do negócio</label>
+            <textarea id="biz-description" name="description" maxlength="400"
+              placeholder="Ex.: Barbearia com atendimento por horário marcado, ambiente climatizado e café cortesia."></textarea>
+            <span class="field-hint"><span id="biz-desc-count">0</span>/400 caracteres · opcional</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Salvar empresa</button>
+          <button type="button" class="btn btn-ghost" id="biz-fill-example">Preencher com exemplo</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== TELA: GERADOR DE LEGENDAS ========== -->
+    <section class="view" id="view-legendas" data-title="Gerar legenda">
+      <p class="view-intro">Preencha os campos e receba um título, legenda, chamada para ação, hashtags e ideia visual.</p>
+
+      <div class="notice notice-warning">
+        ⚠️ <strong>Modo demonstração:</strong> os textos são montados a partir de exemplos prontos.
+        <strong>Não são gerados por inteligência artificial.</strong> Revise sempre antes de publicar.
+      </div>
+
+      <form class="card" id="caption-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="cap-niche">Segmento <span class="required">*</span></label>
+            <select id="cap-niche" name="niche"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="cap-niche"></span>
+          </div>
+
+          <div class="field">
+            <label for="cap-product">Produto ou serviço <span class="required">*</span></label>
+            <input id="cap-product" name="product" maxlength="60" placeholder="Ex.: corte degradê">
+            <span class="field-error" data-error-for="cap-product"></span>
+          </div>
+
+          <div class="field">
+            <label for="cap-goal">Objetivo <span class="required">*</span></label>
+            <select id="cap-goal" name="goal"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="cap-goal"></span>
+          </div>
+
+          <div class="field">
+            <label for="cap-platform">Rede social <span class="required">*</span></label>
+            <select id="cap-platform" name="platform"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="cap-platform"></span>
+          </div>
+
+          <div class="field">
+            <label for="cap-tone">Tom <span class="required">*</span></label>
+            <select id="cap-tone" name="tone"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="cap-tone"></span>
+          </div>
+
+          <div class="field">
+            <label for="cap-format">Formato <span class="required">*</span></label>
+            <select id="cap-format" name="format"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="cap-format"></span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✨ Gerar demonstração</button>
+        </div>
+      </form>
+
+      <div class="card hidden" id="caption-result">
+        <div class="card-header">
+          <h2>Resultado demonstrativo</h2>
+          <span class="tag">Simulado · não é IA</span>
+        </div>
+        <div id="caption-output"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="caption-copy">📋 Copiar</button>
+          <button type="button" class="btn btn-primary" id="caption-save">✏️ Editar e salvar</button>
+          <button type="button" class="btn btn-ghost" id="caption-again">🔄 Outra versão</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TELA: IDEIAS PARA REELS ========== -->
+    <section class="view" id="view-reels" data-title="Ideias para Reels">
+      <p class="view-intro">Receba 5 ideias de vídeos curtos com gancho, roteiro em cenas, texto na tela, legenda e chamada para ação.</p>
+
+      <div class="notice notice-warning">
+        ⚠️ <strong>Modo demonstração:</strong> ideias montadas a partir de modelos prontos, não geradas por IA.
+      </div>
+
+      <form class="card" id="reels-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="reel-niche">Segmento <span class="required">*</span></label>
+            <select id="reel-niche" name="niche"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="reel-niche"></span>
+          </div>
+          <div class="field">
+            <label for="reel-goal">Objetivo <span class="required">*</span></label>
+            <select id="reel-goal" name="goal"><option value="">Selecione…</option></select>
+            <span class="field-error" data-error-for="reel-goal"></span>
+          </div>
+          <div class="field field-full">
+            <label for="reel-product">Produto ou serviço em destaque <span class="required">*</span></label>
+            <input id="reel-product" name="product" maxlength="60" placeholder="Ex.: hidratação capilar">
+            <span class="field-error" data-error-for="reel-product"></span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">🎬 Gerar 5 ideias</button>
+        </div>
+      </form>
+
+      <div class="hidden" id="reels-result">
+        <div class="card-header">
+          <h2>Ideias demonstrativas</h2>
+          <span class="tag">Simulado · não é IA</span>
+        </div>
+        <div id="reels-output"></div>
+      </div>
+    </section>
+
+    <!-- ========== TELA: CALENDÁRIO ========== -->
+    <section class="view" id="view-calendario" data-title="Calendário editorial">
+      <p class="view-intro">Organize suas publicações da semana. Clique em um item para editar ou mudar o status.</p>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="week-nav">
+            <button class="btn btn-secondary btn-sm" id="week-prev" aria-label="Semana anterior">←</button>
+            <button class="btn btn-secondary btn-sm" id="week-today">Hoje</button>
+            <button class="btn btn-secondary btn-sm" id="week-next" aria-label="Próxima semana">→</button>
+            <strong id="week-label"></strong>
+          </div>
+        </div>
+
+        <!-- Planejar a semana inteira (simulado) -->
+        <form class="toolbar" id="week-plan-form" novalidate>
+          <div class="field">
+            <input id="week-product" maxlength="60" placeholder="Produto ou serviço da semana (ex.: corte degradê)" aria-label="Produto ou serviço da semana">
+            <span class="field-error" data-error-for="week-product"></span>
+          </div>
+          <div class="field">
+            <select id="week-goal" aria-label="Objetivo da semana"></select>
+            <span class="field-error" data-error-for="week-goal"></span>
+          </div>
+          <div class="field">
+            <button type="submit" class="btn btn-primary btn-sm">✨ Planejar semana (demo)</button>
+          </div>
+        </form>
+
+        <div class="legend">
+          <span class="tag status-ideia">Ideia</span>
+          <span class="tag status-rascunho">Rascunho</span>
+          <span class="tag status-aprovado">Aprovado</span>
+          <span class="tag status-publicado">Publicado</span>
+        </div>
+
+        <div class="calendar-week" id="calendar-week"></div>
+      </div>
+    </section>
+
+    <!-- ========== TELA: HISTÓRICO ========== -->
+    <section class="view" id="view-historico" data-title="Histórico">
+      <p class="view-intro">Todos os conteúdos salvos. Busque, filtre, edite, copie ou exclua.</p>
+
+      <div class="card">
+        <div class="toolbar">
+          <input type="search" id="hist-search" placeholder="🔍 Buscar por título ou texto…" aria-label="Buscar">
+          <select id="hist-type" aria-label="Filtrar por tipo">
+            <option value="">Todos os tipos</option>
+            <option value="legenda">Legendas</option>
+            <option value="reels">Reels</option>
+            <option value="calendario">Planejamento</option>
+          </select>
+          <select id="hist-status" aria-label="Filtrar por status">
+            <option value="">Todos os status</option>
+          </select>
+        </div>
+        <p class="small muted" id="hist-count"></p>
+        <div class="item-list" id="history-list"></div>
+      </div>
+    </section>
+
+    <!-- ========== TELA: CONFIGURAÇÕES ========== -->
+    <section class="view" id="view-configuracoes" data-title="Configurações">
+      <p class="view-intro">Preferências da demonstração e plano simulado.</p>
+
+      <form class="card" id="settings-form" novalidate>
+        <div class="card-header"><h2>Preferências</h2></div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="set-name">Como podemos te chamar?</label>
+            <input id="set-name" maxlength="40" placeholder="Ex.: Ana">
+          </div>
+          <div class="field">
+            <label for="set-platform">Rede social padrão</label>
+            <select id="set-platform"></select>
+          </div>
+          <div class="field">
+            <label for="set-plan">Plano (simulado)</label>
+            <select id="set-plan"></select>
+            <span class="field-hint">Apenas para testar limites. Nenhuma cobrança é feita.</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Salvar preferências</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <div class="card-header"><h2>Dados da demonstração</h2></div>
+        <p class="muted">
+          Os dados ficam guardados no <strong>armazenamento local do navegador</strong> (localStorage).
+          Isso <strong>não é um banco de dados seguro</strong>: qualquer pessoa com acesso a este computador pode vê-los,
+          e eles somem se você limpar os dados do navegador.
+        </p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="set-load-demo">📥 Carregar exemplos</button>
+          <button type="button" class="btn btn-secondary" id="set-reset-usage">🔁 Zerar contador de gerações</button>
+          <button type="button" class="btn btn-danger" id="set-clear">🗑️ Apagar todos os dados</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===================== JANELA DE EDIÇÃO (MODAL) ===================== -->
+<div class="modal-backdrop" id="post-modal" role="dialog" aria-modal="true" aria-labelledby="post-modal-title">
+  <form class="modal" id="post-form" novalidate>
+    <h2 id="post-modal-title">Editar conteúdo</h2>
+    <input type="hidden" id="post-id">
+    <div class="form-grid">
+      <div class="field field-full">
+        <label for="post-title">Título <span class="required">*</span></label>
+        <input id="post-title" maxlength="100">
+        <span class="field-error" data-error-for="post-title"></span>
+      </div>
+      <div class="field">
+        <label for="post-type">Tipo</label>
+        <select id="post-type">
+          <option value="legenda">Legenda</option>
+          <option value="reels">Reels</option>
+          <option value="calendario">Planejamento</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="post-platform">Rede social</label>
+        <select id="post-platform"></select>
+      </div>
+      <div class="field">
+        <label for="post-status">Status</label>
+        <select id="post-status"></select>
+      </div>
+      <div class="field">
+        <label for="post-date">Data no calendário</label>
+        <input type="date" id="post-date">
+        <span class="field-hint">Deixe vazio para não agendar.</span>
+      </div>
+      <div class="field field-full">
+        <label for="post-caption">Texto / legenda <span class="required">*</span></label>
+        <textarea id="post-caption" rows="6" maxlength="3000"></textarea>
+        <span class="field-error" data-error-for="post-caption"></span>
+      </div>
+      <div class="field field-full">
+        <label for="post-cta">Chamada para ação</label>
+        <input id="post-cta" maxlength="150">
+      </div>
+      <div class="field field-full">
+        <label for="post-hashtags">Hashtags</label>
+        <input id="post-hashtags" maxlength="300">
+      </div>
+      <div class="field field-full">
+        <label for="post-visual">Ideia visual</label>
+        <input id="post-visual" maxlength="300">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Salvar</button>
+      <button type="button" class="btn btn-ghost" id="post-cancel">Cancelar</button>
+      <button type="button" class="btn btn-danger hidden" id="post-delete">Excluir</button>
+    </div>
+  </form>
+</div>
+
+<!-- Mensagens rápidas aparecem aqui -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<!-- ===================== SCRIPTS =====================
+     A ordem importa: primeiro os dados, depois o armazenamento,
+     depois o "cérebro" do app e, por fim, cada tela. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="data/demo-content.js"></script>
+<script src="scripts/storage.js"></script>
+<script src="scripts/supabase-config.js"></script>
+<script src="scripts/supabase-client.js"></script>
+<script src="scripts/app.js"></script>
+<script src="scripts/dashboard.js"></script>
+<script src="scripts/generator.js"></script>
+<script src="scripts/calendar.js"></script>
+<script src="scripts/history.js"></script>
+</body>
+</html>

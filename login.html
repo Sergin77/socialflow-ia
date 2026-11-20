@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — SocialFlow AI (demonstração)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body class="auth-page">
+
+  <main class="auth-card">
+    <div class="auth-header">
+      <a href="index.html" class="logo" aria-label="SocialFlow AI — página inicial">
+        <span class="logo-icon" aria-hidden="true">≋</span>
+        <span>SocialFlow <strong>AI</strong></span>
+      </a>
+      <h1>Acesse a demonstração</h1>
+      <p class="small muted">Seu marketing, no fluxo certo.</p>
+    </div>
+
+    <div class="notice notice-warning" id="auth-mode-notice">
+      ⚠️ <strong>Login simulado:</strong> nenhuma conta real é criada e nada é enviado para a internet.
+      <strong>Não use senhas reais</strong> de outros serviços.
+    </div>
+
+    <!-- Abas: Entrar / Criar conta -->
+    <div class="tabs" role="tablist" aria-label="Modo de acesso">
+      <button type="button" class="tab active" id="tab-login" role="tab" aria-selected="true">Entrar</button>
+      <button type="button" class="tab" id="tab-register" role="tab" aria-selected="false">Criar conta</button>
+    </div>
+
+    <!-- Formulário: Entrar -->
+    <form id="login-form" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="login-email">E-mail <span class="required">*</span></label>
+          <input type="email" id="login-email" placeholder="voce@exemplo.com" autocomplete="email">
+          <span class="field-error" data-error-for="login-email"></span>
+        </div>
+
+        <div class="field">
+          <label for="login-password">Senha <span class="required">*</span></label>
+          <input type="password" id="login-password" placeholder="Mínimo 6 caracteres" autocomplete="current-password">
+          <span class="field-error" data-error-for="login-password"></span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-full">Entrar na demonstração</button>
+      </div>
+    </form>
+
+    <!-- Formulário: Criar conta -->
+    <form id="register-form" class="hidden" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="reg-name">Seu nome <span class="required">*</span></label>
+          <input type="text" id="reg-name" maxlength="40" placeholder="Ex.: Ana" autocomplete="name">
+          <span class="field-error" data-error-for="reg-name"></span>
+        </div>
+
+        <div class="field">
+          <label for="reg-email">E-mail <span class="required">*</span></label>
+          <input type="email" id="reg-email" placeholder="voce@exemplo.com" autocomplete="email">
+          <span class="field-error" data-error-for="reg-email"></span>
+        </div>
+
+        <div class="field">
+          <label for="reg-password">Crie uma senha fictícia <span class="required">*</span></label>
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <span class="field-error" data-error-for="reg-password"></span>
+        </div>
+
+        <div class="field">
+          <label for="reg-confirm">Confirme a senha <span class="required">*</span></label>
+          <input type="password" id="reg-confirm" placeholder="Repita a senha" autocomplete="new-password">
+          <span class="field-error" data-error-for="reg-confirm"></span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-full">Criar conta simulada</button>
+      </div>
+    </form>
+
+    <p class="auth-divider">ou</p>
+
+    <a href="app.html" class="btn btn-secondary btn-full">Pular e abrir direto a demonstração →</a>
+
+    <p class="small muted" style="text-align: center; margin: 16px 0 0;">
+      <a href="index.html">← Voltar para a página inicial</a>
+    </p>
+  </main>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="data/demo-content.js"></script>
+  <script src="scripts/storage.js"></script>
+  <script src="scripts/supabase-config.js"></script>
+  <script src="scripts/supabase-client.js"></script>
+  <script src="scripts/auth.js"></script>
+</body>
+</html>
