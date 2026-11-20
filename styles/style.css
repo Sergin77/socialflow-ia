@@ -884,8 +884,98 @@ input:focus, select:focus, textarea:focus {
 }
 .day-add:hover { border-color: var(--azul); color: var(--azul); }
 
-.week-nav { display: flex; align-items: center; gap: 8px; }
+.week-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+/* Visão mensal do calendário */
+.calendar-month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.month-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--texto-2);
+  padding: 6px 0;
+  text-transform: uppercase;
+}
+.month-day {
+  min-height: 112px;
+  padding: 8px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.month-day.today { border-color: var(--roxo); }
+.month-day.is-other { opacity: 0.45; }
+.month-day-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.month-add {
+  border: none;
+  background: transparent;
+  color: var(--texto-2);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0 4px;
+}
+.month-add:hover { color: var(--azul); }
+
+/* Múltiplas empresas */
+.biz-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.biz-pill {
+  padding: 8px 14px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: var(--superficie-2);
+  color: var(--texto-2);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.biz-pill.active {
+  border-color: var(--roxo);
+  background: rgba(113, 92, 245, 0.2);
+  color: var(--texto);
+}
+
+/* Criador de Card (Canvas) */
+.card-maker-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.card-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+#card-canvas {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--raio);
+  border: 1px solid var(--borda);
+  box-shadow: var(--sombra);
+}
 
 /* ---------- Histórico ---------- */
 .toolbar {
@@ -1081,6 +1171,9 @@ input:focus, select:focus, textarea:focus {
   .calendar-week { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .result-layout { grid-template-columns: 1fr; }
   .quick-ideas { grid-template-columns: 1fr; }
+  .card-maker-layout { grid-template-columns: 1fr; }
+  .calendar-month { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .month-weekday { display: none; }
 }
 
 /* Celulares */
