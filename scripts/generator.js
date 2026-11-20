@@ -146,6 +146,31 @@ const SFGenerator = (function () {
         "</div>"
       );
     }).join("");
+
+    const preview = A.$("#caption-preview");
+    if (preview) {
+      const biz = SFStore.getBusiness();
+      const bizName = biz ? biz.name : "Sua Empresa";
+      const initials = bizName.trim().slice(0, 2).toUpperCase();
+      const platform = (lastCaptionInput && lastCaptionInput.platform) || "Instagram";
+      preview.innerHTML =
+        '<div class="ig-head">' +
+          '<span class="ig-avatar">' + A.escapeHtml(initials) + "</span>" +
+          '<span class="ig-user">' + A.escapeHtml(bizName) + ' <span class="muted" style="font-weight:400;">· ' + A.escapeHtml(platform) + "</span></span>" +
+        "</div>" +
+        '<div class="ig-media">' +
+          '<span class="ig-media-badge">Prévia visual</span>' +
+          '<p class="ig-media-title">' + A.escapeHtml(result.title) + "</p>" +
+          '<p class="ig-media-hint">' + A.escapeHtml(result.visual) + "</p>" +
+        "</div>" +
+        '<div class="ig-actions"><span>♡  💬  ➤</span><span>🔖</span></div>' +
+        '<div class="ig-body">' +
+          "<strong>" + A.escapeHtml(bizName) + "</strong> " + A.escapeHtml(result.caption) +
+          (result.cta ? "\n\n" + A.escapeHtml(result.cta) : "") +
+          (result.hashtags ? '<p class="ig-tags">' + A.escapeHtml(result.hashtags) + "</p>" : "") +
+        "</div>";
+    }
+
     A.$("#caption-result").classList.remove("hidden");
     A.$("#caption-result").scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -367,6 +392,24 @@ const SFGenerator = (function () {
     const value = fields[Number(btn.dataset.copyBlock)];
     if (value) A.copyText(value);
   });
+  function findNextOpenDate() {
+    const usedDates = new Set(
+      SFStore.getPosts().map(function (p) { return p.scheduled_for; }).filter(Boolean)
+    );
+    const today = new Date();
+    for (let i = 1; i <= 14; i++) {
+      const candidate = A.toISODate(A.addDays(today, i));
+      if (!usedDates.has(candidate)) return candidate;
+    }
+    return A.toISODate(A.addDays(today, 1));
+  }
+
+  function prefillCaption(opts) {
+    if (!opts) return;
+    if (opts.product && A.$("#cap-product")) A.$("#cap-product").value = opts.product;
+    if (opts.goal && A.$("#cap-goal")) A.$("#cap-goal").value = opts.goal;
+  }
+
   A.$("#caption-save").addEventListener("click", function () {
     if (!lastCaptionResult) return;
     A.openPostModal(Object.assign({}, lastCaptionResult, {
@@ -375,6 +418,17 @@ const SFGenerator = (function () {
       status: "rascunho"
     }));
   });
+  if (A.$("#caption-schedule")) {
+    A.$("#caption-schedule").addEventListener("click", function () {
+      if (!lastCaptionResult) return;
+      A.openPostModal(Object.assign({}, lastCaptionResult, {
+        content_type: "legenda",
+        platform: lastCaptionInput.platform,
+        status: "aprovado",
+        scheduled_for: findNextOpenDate()
+      }));
+    });
+  }
   A.$("#caption-again").addEventListener("click", function () {
     if (lastCaptionInput) runCaption(lastCaptionInput);
   });
@@ -384,6 +438,6 @@ const SFGenerator = (function () {
   A.onShow("legendas", renderCaptionView);
   A.onShow("reels", renderReelsView);
 
-  // Usado pelo calendário
-  return { fill, pick, buildVars, getNiche, ensureCanGenerate };
+  // Usado pelo calendário e pelo dashboard
+  return { fill, pick, buildVars, getNiche, ensureCanGenerate, prefillCaption };
 })();
