@@ -396,6 +396,33 @@ img {
   white-space: nowrap;
 }
 
+/* FAQ (Perguntas Frequentes) */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.faq-item {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 16px 20px;
+}
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.faq-item summary::after { content: "+"; color: var(--azul); font-size: 1.2rem; }
+.faq-item[open] summary::after { content: "−"; }
+.faq-item p { margin: 12px 0 0; color: var(--texto-2); }
+
 /* Chamada final e rodapé */
 .cta-final { text-align: center; }
 .cta-final .lead { margin: 0 auto 28px; }
@@ -697,6 +724,103 @@ input:focus, select:focus, textarea:focus {
 }
 .btn-copy-inline:hover { border-color: var(--azul); color: var(--texto); }
 .card-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Ideias rápidas do Dashboard */
+.quick-ideas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.quick-idea-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  color: var(--texto);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.quick-idea-btn:hover { border-color: var(--roxo); transform: translateY(-2px); }
+.quick-idea-btn strong { font-size: 0.95rem; }
+.quick-idea-btn span { color: var(--texto-2); font-size: 0.82rem; }
+
+/* Prévia do post (Instagram) ao lado do resultado */
+.result-layout {
+  display: grid;
+  grid-template-columns: 1.25fr 0.9fr;
+  gap: 20px;
+  align-items: start;
+}
+.ig-preview {
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: #0d1324;
+  overflow: hidden;
+}
+.ig-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--borda);
+}
+.ig-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--gradiente);
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.ig-user { font-size: 0.85rem; font-weight: 700; }
+.ig-media {
+  padding: 28px 20px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(113, 92, 245, 0.35), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(69, 184, 245, 0.25), transparent 60%),
+    #141d36;
+  border-bottom: 1px solid var(--borda);
+}
+.ig-media-badge {
+  align-self: center;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(16, 23, 42, 0.7);
+  color: var(--azul);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.ig-media-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 8px; }
+.ig-media-hint { font-size: 0.78rem; color: var(--texto-2); margin: 0; }
+.ig-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px 4px;
+  color: var(--texto-2);
+  font-size: 0.9rem;
+}
+.ig-body {
+  padding: 6px 14px 16px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+.ig-tags { color: var(--azul); margin-top: 8px; font-size: 0.8rem; }
 .result-block p:last-child { margin-bottom: 0; }
 .result-block textarea { min-height: 120px; }
 
@@ -955,6 +1079,8 @@ input:focus, select:focus, textarea:focus {
   .menu-toggle { display: inline-flex; }
   .main { padding: 0 18px 40px; }
   .calendar-week { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .result-layout { grid-template-columns: 1fr; }
+  .quick-ideas { grid-template-columns: 1fr; }
 }
 
 /* Celulares */
