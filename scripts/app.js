@@ -10,10 +10,11 @@
 
 const SFApp = (function () {
   const D = DEMO_CONTENT;
-  const VIEWS = ["dashboard", "empresa", "legendas", "reels", "calendario", "historico", "configuracoes"];
+  const VIEWS = ["dashboard", "empresa", "legendas", "reels", "card", "calendario", "historico", "configuracoes"];
   const renderers = {};      // funções que desenham cada tela
   let currentView = "dashboard";
   let loadingRemote = false;
+  let creatingNewBusiness = false;
 
   /* =====================================================
      1. FERRAMENTAS GERAIS
@@ -219,12 +220,32 @@ const SFApp = (function () {
      3. TELA "MINHA EMPRESA"
      ===================================================== */
   function renderBusiness() {
-    const b = SFStore.getBusiness();
-    $("#biz-name").value = b ? b.name : "";
-    $("#biz-niche").value = b ? b.niche : "";
-    $("#biz-audience").value = b ? b.audience : "";
-    $("#biz-tone").value = b ? b.tone : "";
-    $("#biz-description").value = b ? b.description : "";
+    const list = SFStore.getBusinesses();
+    const active = creatingNewBusiness ? null : SFStore.getBusiness();
+    const plan = SFStore.getPlan();
+    const maxBiz = plan.businesses || 1;
+    const switcher = $("#biz-switcher");
+
+    if (switcher) {
+      let html = list.map(function (item) {
+        const isCurrent = !creatingNewBusiness && active && item.id === active.id;
+        return '<button type="button" class="biz-pill' + (isCurrent ? " active" : "") + '" data-biz-id="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + "</button>";
+      }).join("");
+
+      if (list.length < maxBiz && list.length > 0) {
+        html += '<button type="button" class="biz-pill' + (creatingNewBusiness ? " active" : "") + '" data-biz-new="1">+ Nova empresa</button>';
+      } else if (list.length > 0) {
+        html += '<span class="small muted">(' + list.length + "/" + maxBiz + " no plano " + plan.label + ")</span>";
+      }
+      switcher.innerHTML = html;
+    }
+
+    $("#biz-name").value = active ? active.name : "";
+    $("#biz-niche").value = active ? active.niche : "";
+    $("#biz-audience").value = active ? active.audience : "";
+    $("#biz-tone").value = active ? active.tone : "";
+    $("#biz-description").value = active ? active.description : "";
+    if ($("#biz-delete")) $("#biz-delete").classList.toggle("hidden", !active || list.length <= 1);
     updateDescCount();
     ["biz-name", "biz-niche", "biz-audience", "biz-tone"].forEach(function (id) { setError(id, ""); });
   }
@@ -243,6 +264,14 @@ const SFApp = (function () {
     ]);
     if (!ok) return;
 
+    const list = SFStore.getBusinesses();
+    const maxBiz = (SFStore.getPlan().businesses) || 1;
+    if (creatingNewBusiness && list.length >= maxBiz) {
+      toast("Limite de empresas do plano atingido (" + maxBiz + ").", "error");
+      return;
+    }
+
+    const active = creatingNewBusiness ? null : SFStore.getBusiness();
     const bizData = {
       name: $("#biz-name").value.trim(),
       niche: $("#biz-niche").value,
@@ -255,10 +284,11 @@ const SFApp = (function () {
       const user = await SFSupabase.getUser();
       if (user) {
         try {
-          await SFSupabase.saveMyBusiness(bizData);
-          SFStore.saveBusiness(bizData);
+          const saved = await SFSupabase.saveMyBusiness(bizData, active ? active.id : null);
+          SFStore.saveBusiness(saved, creatingNewBusiness);
+          creatingNewBusiness = false;
           toast("Empresa salva no banco de dados (Supabase)!", "success");
-          updateChrome();
+          refresh();
           return;
         } catch (err) {
           toast(err.message, "error");
@@ -267,9 +297,29 @@ const SFApp = (function () {
       }
     }
 
-    SFStore.saveBusiness(bizData);
+    SFStore.saveBusiness(bizData, creatingNewBusiness);
+    creatingNewBusiness = false;
     toast("Empresa salva com sucesso!", "success");
-    updateChrome();
+    refresh();
+  }
+
+  async function onDeleteBusiness() {
+    const active = SFStore.getBusiness();
+    if (!active) return;
+    if (!window.confirm('Excluir a empresa "' + active.name + '"? Os conteúdos dela também podem ser removidos.')) return;
+
+    if (typeof SFSupabase !== "undefined" && SFSupabase.isLoggedIn()) {
+      try {
+        await SFSupabase.deleteMyBusiness(active.id);
+      } catch (err) {
+        toast(err.message, "error");
+        return;
+      }
+    }
+    SFStore.deleteBusiness(active.id);
+    creatingNewBusiness = false;
+    toast("Empresa excluída.", "success");
+    refresh();
   }
 
   function fillBusinessExample() {
@@ -493,6 +543,24 @@ const SFApp = (function () {
     $("#business-form").addEventListener("submit", onBusinessSubmit);
     $("#biz-description").addEventListener("input", updateDescCount);
     $("#biz-fill-example").addEventListener("click", fillBusinessExample);
+    if ($("#biz-delete")) $("#biz-delete").addEventListener("click", onDeleteBusiness);
+    if ($("#biz-switcher")) {
+      $("#biz-switcher").addEventListener("click", function (event) {
+        const pill = event.target.closest(".biz-pill");
+        if (!pill) return;
+        if (pill.dataset.bizNew) {
+          creatingNewBusiness = true;
+          renderBusiness();
+          return;
+        }
+        creatingNewBusiness = false;
+        SFStore.setActiveBusiness(pill.dataset.bizId);
+        if (typeof SFSupabase !== "undefined" && SFSupabase.setActiveBusinessId) {
+          SFSupabase.setActiveBusinessId(pill.dataset.bizId);
+        }
+        refresh();
+      });
+    }
     $("#settings-form").addEventListener("submit", onSettingsSubmit);
     $("#set-load-demo").addEventListener("click", loadExamples);
     $("#set-reset-usage").addEventListener("click", resetUsage);
@@ -540,9 +608,13 @@ const SFApp = (function () {
         const name = (user.user_metadata && user.user_metadata.name) || "";
         SFStore.saveSession({ name: name, email: user.email });
         try {
-          const remoteBiz = await SFSupabase.getMyBusiness();
-          if (remoteBiz) SFStore.saveBusiness(remoteBiz);
-          else SFStore.clearBusiness();
+          const remoteList = await SFSupabase.getMyBusinesses();
+          if (remoteList && remoteList.length) {
+            SFStore.setBusinesses(remoteList);
+            SFSupabase.setActiveBusinessId(SFStore.getActiveBusinessId());
+          } else {
+            SFStore.clearBusiness();
+          }
 
           const remotePosts = await SFSupabase.getPosts();
           SFStore.setPosts(remotePosts);
