@@ -141,10 +141,35 @@
     A.refresh();
   }
 
+  function copyWeek() {
+    const posts = SFStore.getPosts();
+    const lines = [];
+    for (let i = 0; i < 7; i++) {
+      const date = A.addDays(weekStart, i);
+      const iso = A.toISODate(date);
+      const dayPosts = posts.filter(function (p) { return p.scheduled_for === iso; });
+      if (!dayPosts.length) continue;
+      const dayLabel = date.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit" });
+      lines.push("📅 " + dayLabel.toUpperCase());
+      dayPosts.forEach(function (p) {
+        lines.push("• [" + A.statusLabel(p.status) + "] " + p.title);
+        if (p.caption) lines.push("  " + p.caption);
+        if (p.cta) lines.push("  CTA: " + p.cta);
+      });
+      lines.push("");
+    }
+    if (!lines.length) {
+      A.toast("Nenhum conteúdo agendado nesta semana para copiar.", "error");
+      return;
+    }
+    A.copyText(lines.join("\n").trim());
+  }
+
   A.$("#calendar-week").addEventListener("click", onCalendarClick);
   A.$("#week-prev").addEventListener("click", function () { changeWeek(-7); });
   A.$("#week-next").addEventListener("click", function () { changeWeek(7); });
   A.$("#week-today").addEventListener("click", function () { changeWeek(0); });
+  if (A.$("#week-copy")) A.$("#week-copy").addEventListener("click", copyWeek);
   A.$("#week-plan-form").addEventListener("submit", onPlanWeek);
 
   A.onShow("calendario", renderCalendar);
