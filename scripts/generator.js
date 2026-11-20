@@ -429,6 +429,18 @@ const SFGenerator = (function () {
       }));
     });
   }
+  if (A.$("#caption-make-card")) {
+    A.$("#caption-make-card").addEventListener("click", function () {
+      if (!lastCaptionResult) return;
+      if (typeof SFCardMaker !== "undefined" && SFCardMaker.prefill) {
+        SFCardMaker.prefill({
+          title: lastCaptionResult.title,
+          subtitle: lastCaptionResult.cta
+        });
+      }
+      window.location.hash = "card";
+    });
+  }
   A.$("#caption-again").addEventListener("click", function () {
     if (lastCaptionInput) runCaption(lastCaptionInput);
   });
