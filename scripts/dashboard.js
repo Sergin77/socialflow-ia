@@ -1,52 +1,55 @@
 /* =========================================================
-   SocialFlow AI — Dashboard (dashboard.js)
-   Mostra números de resumo e os itens mais recentes.
+   SocialFlow AI — Histórico (history.js)
+   Lista todos os conteúdos com busca e filtros.
    ========================================================= */
 
 (function () {
   const A = SFApp;
 
-  function renderDashboard() {
-    const posts = SFStore.getPosts();
-    const business = SFStore.getBusiness();
+  // Remove acentos e deixa minúsculo, para a busca achar "salao" e "Salão"
+  function normalize(text) {
+    return String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
 
-    // Intervalo da semana atual (segunda a domingo)
-    const monday = A.startOfWeek(new Date());
-    const weekStart = A.toISODate(monday);
-    const weekEnd = A.toISODate(A.addDays(monday, 6));
+  function renderHistory() {
+    const all = SFStore.getPosts();
+    const search = normalize(A.$("#hist-search").value.trim());
+    const type = A.$("#hist-type").value;
+    const status = A.$("#hist-status").value;
 
-    const scheduledThisWeek = posts.filter(function (p) {
-      return p.scheduled_for && p.scheduled_for >= weekStart && p.scheduled_for <= weekEnd;
-    }).length;
-    const published = posts.filter(function (p) { return p.status === "publicado"; }).length;
+    const filtered = all.filter(function (p) {
+      const matchesSearch = !search || normalize(p.title + " " + p.caption + " " + p.hashtags).includes(search);
+      const matchesType = !type || p.content_type === type;
+      const matchesStatus = !status || p.status === status;
+      return matchesSearch && matchesType && matchesStatus;
+    });
 
-    A.$("#stat-total").textContent = posts.length;
-    A.$("#stat-week").textContent = scheduledThisWeek;
-    A.$("#stat-published").textContent = published;
-    A.$("#stat-left").textContent = SFStore.getRemaining();
+    A.$("#hist-count").textContent = all.length
+      ? "Mostrando " + filtered.length + " de " + all.length + " conteúdo(s)."
+      : "";
 
-    A.$("#dash-no-business").classList.toggle("hidden", Boolean(business));
-
-    // Saudação personalizada
-    const name = SFStore.getSettings().userName;
-    A.$("#view-dashboard .view-intro").textContent =
-      (name ? "Olá, " + name + "! " : "") + "Resumo do seu marketing nesta semana.";
-
-    // Itens recentes (até 5)
-    const list = A.$("#recent-list");
+    const list = A.$("#history-list");
     if (A.isLoadingRemote && A.isLoadingRemote()) {
       list.innerHTML = '<div class="empty-state">⏳ Carregando seus dados…</div>';
       return;
     }
-    if (!posts.length) {
+    if (!all.length) {
       list.innerHTML =
-        '<div class="empty-state">Nenhum conteúdo salvo ainda.<br>' +
-        'Comece pelo <a href="#legendas">gerador de legendas</a> ou ' +
-        'carregue exemplos em <a href="#configuracoes">Configurações</a>.</div>';
+        '<div class="empty-state">Nada salvo ainda.<br>' +
+        'Gere uma <a href="#legendas">legenda</a>, ideias de <a href="#reels">Reels</a> ' +
+        'ou carregue exemplos em <a href="#configuracoes">Configurações</a>.</div>';
       return;
     }
-    list.innerHTML = posts.slice(0, 5).map(function (p) { return A.renderPostItem(p); }).join("");
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-state">Nenhum conteúdo encontrado com esses filtros.</div>';
+      return;
+    }
+    list.innerHTML = filtered.map(function (p) { return A.renderPostItem(p, { showDelete: true }); }).join("");
   }
 
-  A.onShow("dashboard", renderDashboard);
+  A.$("#hist-search").addEventListener("input", renderHistory);
+  A.$("#hist-type").addEventListener("change", renderHistory);
+  A.$("#hist-status").addEventListener("change", renderHistory);
+
+  A.onShow("historico", renderHistory);
 })();
