@@ -19,7 +19,8 @@ const SFStore = (function () {
     return {
       version: 1,
       session: null,
-      business: null,
+      businesses: [],
+      activeBusinessId: null,
       posts: [],
       usage: [],
       settings: { userName: "", defaultPlatform: "Instagram", plan: "free" }
@@ -40,10 +41,16 @@ const SFStore = (function () {
     try {
       const saved = JSON.parse(raw);
       const base = defaultState();
+      let businesses = Array.isArray(saved.businesses) ? saved.businesses : [];
+      if (!businesses.length && saved.business) {
+        businesses = [Object.assign({ id: newId() }, saved.business)];
+      }
+      const activeId = saved.activeBusinessId || (businesses[0] ? businesses[0].id : null);
       return {
         version: 1,
         session: saved.session || null,
-        business: saved.business || null,
+        businesses: businesses,
+        activeBusinessId: activeId,
         posts: Array.isArray(saved.posts) ? saved.posts : [],
         usage: Array.isArray(saved.usage) ? saved.usage : [],
         settings: Object.assign(base.settings, saved.settings || {})
@@ -81,13 +88,36 @@ const SFStore = (function () {
     return value == null ? value : JSON.parse(JSON.stringify(value));
   }
 
-  /* ---------- Empresa ---------- */
-  function getBusiness() {
-    return clone(state.business);
+  /* ---------- Empresas (múltiplas conforme plano) ---------- */
+  function getBusinesses() {
+    return clone(state.businesses);
   }
 
-  function saveBusiness(data) {
-    state.business = {
+  function getActiveBusinessId() {
+    return state.activeBusinessId;
+  }
+
+  function setActiveBusiness(id) {
+    state.activeBusinessId = id;
+    persist();
+  }
+
+  function setBusinesses(list) {
+    state.businesses = Array.isArray(list) ? clone(list) : [];
+    const exists = state.businesses.some(function (b) { return b.id === state.activeBusinessId; });
+    state.activeBusinessId = exists ? state.activeBusinessId : (state.businesses[0] ? state.businesses[0].id : null);
+    persist();
+  }
+
+  function getBusiness() {
+    if (!state.businesses.length) return null;
+    const found = state.businesses.find(function (b) { return b.id === state.activeBusinessId; });
+    return clone(found || state.businesses[0]);
+  }
+
+  function saveBusiness(data, asNew) {
+    const entry = {
+      id: data.id || (asNew ? newId() : (state.activeBusinessId || newId())),
       name: data.name,
       niche: data.niche,
       audience: data.audience,
@@ -95,11 +125,23 @@ const SFStore = (function () {
       description: data.description || "",
       updated_at: nowISO()
     };
+    const idx = asNew ? -1 : state.businesses.findIndex(function (b) { return b.id === entry.id; });
+    if (idx >= 0) state.businesses[idx] = entry;
+    else state.businesses.push(entry);
+    state.activeBusinessId = entry.id;
+    persist();
+    return clone(entry);
+  }
+
+  function deleteBusiness(id) {
+    state.businesses = state.businesses.filter(function (b) { return b.id !== id; });
+    state.activeBusinessId = state.businesses[0] ? state.businesses[0].id : null;
     persist();
   }
 
   function clearBusiness() {
-    state.business = null;
+    state.businesses = [];
+    state.activeBusinessId = null;
     persist();
   }
 
@@ -271,7 +313,8 @@ const SFStore = (function () {
   // Estas são as funções que as outras partes do app podem usar
   return {
     getSession, saveSession, clearSession,
-    getBusiness, saveBusiness, clearBusiness,
+    getBusinesses, getActiveBusinessId, setActiveBusiness, setBusinesses,
+    getBusiness, saveBusiness, deleteBusiness, clearBusiness,
     setPosts, getPosts, getPost, addPost, updatePost, deletePost,
     getSettings, saveSettings,
     getPlan, getUsageThisMonth, getRemaining, canGenerate, logUsage, resetUsage, setUsageFromServer,
