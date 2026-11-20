@@ -68,6 +68,11 @@
       </div>
 
       <div class="card">
+        <div class="card-header"><h2>💡 Ideia rápida para hoje</h2></div>
+        <div class="quick-ideas" id="quick-ideas-list"></div>
+      </div>
+
+      <div class="card">
         <div class="card-header"><h2>Atalhos</h2></div>
         <div class="shortcuts">
           <a href="#legendas" class="btn btn-primary btn-sm">✍️ Nova legenda</a>
@@ -201,10 +206,14 @@
             <button type="button" class="btn btn-secondary btn-sm" id="caption-copy-top">📋 Copiar tudo</button>
           </div>
         </div>
-        <div id="caption-output"></div>
+        <div class="result-layout">
+          <div id="caption-output"></div>
+          <aside class="ig-preview" id="caption-preview" aria-label="Prévia do post"></aside>
+        </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" id="caption-copy">📋 Copiar</button>
-          <button type="button" class="btn btn-primary" id="caption-save">✏️ Editar e salvar</button>
+          <button type="button" class="btn btn-primary" id="caption-schedule">📅 Agendar na próxima vaga</button>
+          <button type="button" class="btn btn-secondary" id="caption-save">✏️ Editar e salvar</button>
           <button type="button" class="btn btn-ghost" id="caption-again">🔄 Outra versão</button>
         </div>
       </div>
@@ -262,6 +271,7 @@
             <button class="btn btn-secondary btn-sm" id="week-next" aria-label="Próxima semana">→</button>
             <strong id="week-label"></strong>
           </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="week-copy">📋 Copiar semana</button>
         </div>
 
         <!-- Planejar a semana inteira (simulado) -->
