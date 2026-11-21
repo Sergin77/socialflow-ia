@@ -51,6 +51,7 @@
     <header class="topbar">
       <button class="btn btn-secondary btn-sm menu-toggle" id="menu-toggle" aria-label="Abrir menu">☰</button>
       <h1 id="page-title">Dashboard</h1>
+      <button type="button" class="btn btn-secondary btn-sm" id="theme-toggle" aria-label="Alternar tema">☀️</button>
       <span class="business-chip" id="business-chip">Nenhuma empresa cadastrada</span>
     </header>
 
@@ -215,6 +216,7 @@
           <div class="field">
             <label for="cap-platform">Rede social <span class="required">*</span></label>
             <select id="cap-platform" name="platform"><option value="">Selecione…</option></select>
+            <span class="field-hint" id="cap-platform-tip"></span>
             <span class="field-error" data-error-for="cap-platform"></span>
           </div>
 
@@ -573,6 +575,7 @@
 <script src="scripts/storage.js"></script>
 <script src="scripts/supabase-config.js"></script>
 <script src="scripts/supabase-client.js"></script>
+<script src="scripts/theme.js"></script>
 <script src="scripts/app.js"></script>
 <script src="scripts/dashboard.js"></script>
 <script src="scripts/generator.js"></script>
