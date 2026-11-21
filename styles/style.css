@@ -1149,8 +1149,18 @@ input:focus, select:focus, textarea:focus {
 }
 
 @media (max-width: 900px) {
-  /* Landing */
-  .site-nav { display: none; }
+  /* Landing: barra de navegação rápida no celular */
+  .header-inner { flex-wrap: wrap; height: auto; padding: 12px 0; gap: 10px; }
+  .site-nav {
+    order: 3;
+    width: 100%;
+    gap: 18px;
+    padding-top: 8px;
+    border-top: 1px solid var(--borda);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .site-nav a { font-size: 0.85rem; }
   .hero { padding: 60px 0 50px; }
   .hero-inner { grid-template-columns: 1fr; gap: 40px; }
   .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
