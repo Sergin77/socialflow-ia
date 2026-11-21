@@ -31,14 +31,16 @@ const SFApp = (function () {
     });
   }
 
-  // Mostra uma mensagem rápida no canto da tela
+  // Mostra uma mensagem rápida no canto da tela (substitui a anterior para evitar empilhamento)
   function toast(message, type) {
     const container = $("#toast-container");
+    if (!container) return;
+    container.innerHTML = "";
     const el = document.createElement("div");
     el.className = "toast" + (type === "success" ? " toast-success" : type === "error" ? " toast-error" : "");
     el.textContent = message;
     container.appendChild(el);
-    setTimeout(function () { el.remove(); }, 4000);
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 4000);
   }
 
   // Copia um texto para a área de transferência (Ctrl+V depois)
@@ -178,8 +180,14 @@ const SFApp = (function () {
     document.title = view.dataset.title + " · SocialFlow AI";
 
     closeMenu();
+    const mainEl = $(".main");
+    if (mainEl) mainEl.scrollTop = 0;
     window.scrollTo(0, 0);
     refresh();
+    requestAnimationFrame(function () {
+      if (mainEl) mainEl.scrollTop = 0;
+      window.scrollTo(0, 0);
+    });
   }
 
   // Redesenha a tela atual e a barra lateral
@@ -426,6 +434,8 @@ const SFApp = (function () {
     setError("post-caption", "");
 
     $("#post-modal").classList.add("open");
+    const modalBox = $("#post-modal .modal");
+    if (modalBox) modalBox.scrollTop = 0;
     $("#post-title").focus();
   }
 
@@ -578,13 +588,16 @@ const SFApp = (function () {
     $("#set-clear").addEventListener("click", clearAllData);
     $("#logout-link").addEventListener("click", async function (e) {
       e.preventDefault();
+      const wasLoggedIn = typeof SFSupabase !== "undefined" && SFSupabase.isLoggedIn();
       if (typeof SFSupabase !== "undefined" && SFSupabase.isEnabled()) {
         try { await SFSupabase.signOut(); } catch (err) { /* ignorar */ }
       }
       SFStore.clearSession();
-      SFStore.clearBusiness();
-      SFStore.setPosts([]);
-      SFStore.resetUsage();
+      if (wasLoggedIn) {
+        SFStore.clearBusiness();
+        SFStore.setPosts([]);
+        SFStore.resetUsage();
+      }
       window.location.href = "login.html";
     });
 
