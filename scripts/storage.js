@@ -161,9 +161,14 @@ const SFStore = (function () {
   }
 
   function getPosts() {
-    return clone(state.posts).sort(function (a, b) {
-      return (b.created_at || "").localeCompare(a.created_at || "");
-    });
+    const activeBiz = state.activeBusinessId;
+    return clone(state.posts)
+      .filter(function (p) {
+        return !activeBiz || !p.business_id || p.business_id === activeBiz;
+      })
+      .sort(function (a, b) {
+        return (b.created_at || "").localeCompare(a.created_at || "");
+      });
   }
 
   function getPost(id) {
@@ -171,8 +176,10 @@ const SFStore = (function () {
   }
 
   function addPost(data) {
+    const activeBiz = getBusiness();
     const post = {
       id: newId(),
+      business_id: data.business_id || (activeBiz ? activeBiz.id : ""),
       title: data.title || "Sem título",
       content_type: data.content_type || "legenda",
       platform: data.platform || state.settings.defaultPlatform,
