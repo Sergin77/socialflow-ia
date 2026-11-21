@@ -139,6 +139,7 @@ const SFCardMaker = (function () {
   function onPhotoChange(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
+    if (A.$("#card-photo-name")) A.$("#card-photo-name").textContent = file.name;
     const reader = new FileReader();
     reader.onload = function (e) {
       const img = new Image();
@@ -204,6 +205,7 @@ const SFCardMaker = (function () {
     A.$("#card-clear-photo").addEventListener("click", function () {
       uploadedImage = null;
       if (A.$("#card-photo")) A.$("#card-photo").value = "";
+      if (A.$("#card-photo-name")) A.$("#card-photo-name").textContent = "Nenhuma foto selecionada";
       drawCard();
     });
   }
