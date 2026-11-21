@@ -95,6 +95,7 @@ const SFSupabase = (function () {
   function normalizePost(row) {
     return {
       id: row.id,
+      business_id: row.business_id || "",
       title: row.title || "Sem título",
       content_type: row.content_type || "legenda",
       platform: row.platform || "Instagram",
@@ -174,7 +175,7 @@ const SFSupabase = (function () {
     if (!sb || !user) return [];
     const res = await sb
       .from("content_posts")
-      .select("id, title, content_type, platform, caption, cta, hashtags, visual, status, scheduled_for, created_at")
+      .select("id, business_id, title, content_type, platform, caption, cta, hashtags, visual, status, scheduled_for, created_at")
       .order("created_at", { ascending: false });
     if (res.error) throw new Error(translateError(res.error));
     return (res.data || []).map(normalizePost);
