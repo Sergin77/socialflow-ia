@@ -18,15 +18,23 @@
   if (useSupabase && modeNotice) {
     modeNotice.className = "notice";
     modeNotice.innerHTML = "🔒 <strong>Conectado ao Supabase:</strong> autenticação real ativa para testes. Use suas contas de teste.";
+    const regPassLabel = document.getElementById("reg-password-label");
+    if (regPassLabel) regPassLabel.innerHTML = 'Crie uma senha <span class="required">*</span>';
+    const loginBtn = loginForm.querySelector('button[type="submit"]');
+    if (loginBtn) loginBtn.textContent = "Entrar";
+    const regBtn = registerForm.querySelector('button[type="submit"]');
+    if (regBtn) regBtn.textContent = "Criar conta";
   }
 
   function toast(message, type) {
     const container = document.getElementById("toast-container");
+    if (!container) return;
+    container.innerHTML = "";
     const el = document.createElement("div");
     el.className = "toast" + (type === "success" ? " toast-success" : type === "error" ? " toast-error" : "");
     el.textContent = message;
     container.appendChild(el);
-    setTimeout(function () { el.remove(); }, 4000);
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 4000);
   }
 
   function setError(id, message) {
