@@ -56,8 +56,19 @@ const SFApp = (function () {
     return ok;
   }
 
-  function copyText(text) {
-    const done = function () { toast("Copiado! Agora é só colar onde quiser (Ctrl + V).", "success"); };
+  function copyText(text, btn) {
+    const done = function () {
+      toast("Copiado! Agora é só colar onde quiser (Ctrl + V).", "success");
+      if (btn && !btn.dataset.copying) {
+        const original = btn.textContent;
+        btn.dataset.copying = "1";
+        btn.textContent = "✓ Copiado";
+        setTimeout(function () {
+          btn.textContent = original;
+          delete btn.dataset.copying;
+        }, 1800);
+      }
+    };
     const fail = function () { toast("Não foi possível copiar automaticamente. Selecione o texto e use Ctrl + C.", "error"); };
 
     if (navigator.clipboard && window.isSecureContext) {
@@ -499,7 +510,7 @@ const SFApp = (function () {
     if (!post) return;
 
     if (button.dataset.action === "edit") openPostModal(post);
-    if (button.dataset.action === "copy") copyText(postToText(post));
+    if (button.dataset.action === "copy") copyText(postToText(post), button);
     if (button.dataset.action === "delete" && confirmDelete(post)) refresh();
   }
 
