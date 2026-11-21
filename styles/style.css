@@ -601,7 +601,7 @@ img {
 .view.active { display: block; }
 
 @keyframes aparecer {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 1; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -633,6 +633,9 @@ img {
   margin-bottom: 20px;
 }
 .stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: 20px;
   background: var(--superficie);
   border: 1px solid var(--borda);
@@ -1138,13 +1141,41 @@ input:focus, select:focus, textarea:focus {
   max-width: 560px;
   max-height: 90vh;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borda) var(--superficie);
   padding: 24px;
   border: 1px solid var(--borda);
   border-radius: var(--raio);
   background: var(--superficie);
   box-shadow: var(--sombra);
 }
+.modal::-webkit-scrollbar { width: 8px; }
+.modal::-webkit-scrollbar-track { background: var(--superficie); border-radius: 8px; }
+.modal::-webkit-scrollbar-thumb { background: var(--borda); border-radius: 8px; }
 .modal h2 { font-size: 1.2rem; }
+
+/* Upload estilizado no Criar Card */
+.file-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.file-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.file-upload-label { cursor: pointer; }
+.file-upload-name {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* ---------- Mensagens rápidas (toasts) ---------- */
 .toast-container {
@@ -1155,8 +1186,10 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  pointer-events: none;
 }
 .toast {
+  pointer-events: auto;
   min-width: 240px;
   max-width: 360px;
   padding: 12px 16px;
@@ -1290,6 +1323,7 @@ input:focus, select:focus, textarea:focus {
   .grid-2, .grid-3, .grid-4, .steps { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
   .toolbar { grid-template-columns: 1fr; }
+  .toolbar select, .toolbar input { width: 100%; min-width: 0; }
   .stats { grid-template-columns: 1fr 1fr; }
   .calendar-week { grid-template-columns: 1fr; }
   .day-column { min-height: auto; }
