@@ -200,11 +200,19 @@
     A.refresh();
   }
 
-  function copyWeek() {
+  function formatPeriodText() {
     const posts = SFStore.getPosts();
     const lines = [];
-    for (let i = 0; i < 7; i++) {
-      const date = A.addDays(weekStart, i);
+    let startDate = weekStart;
+    let totalDays = 7;
+
+    if (viewMode === "month") {
+      startDate = new Date(monthRef.getFullYear(), monthRef.getMonth(), 1);
+      totalDays = new Date(monthRef.getFullYear(), monthRef.getMonth() + 1, 0).getDate();
+    }
+
+    for (let i = 0; i < totalDays; i++) {
+      const date = A.addDays(startDate, i);
       const iso = A.toISODate(date);
       const dayPosts = posts.filter(function (p) { return p.scheduled_for === iso; });
       if (!dayPosts.length) continue;
@@ -217,11 +225,32 @@
       });
       lines.push("");
     }
-    if (!lines.length) {
-      A.toast("Nenhum conteúdo agendado nesta semana para copiar.", "error");
+    return lines.join("\n").trim();
+  }
+
+  function copyWeek() {
+    const text = formatPeriodText();
+    if (!text) {
+      A.toast("Nenhum conteúdo agendado neste período para copiar.", "error");
       return;
     }
-    A.copyText(lines.join("\n").trim(), A.$("#week-copy"));
+    A.copyText(text, A.$("#week-copy"));
+  }
+
+  function downloadPeriod() {
+    const text = formatPeriodText();
+    if (!text) {
+      A.toast("Nenhum conteúdo agendado neste período para baixar.", "error");
+      return;
+    }
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "socialflow-calendario.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+    A.toast("Calendário baixado em .txt!", "success");
   }
 
   A.$("#calendar-week").addEventListener("click", onCalendarClick);
@@ -231,6 +260,7 @@
   if (A.$("#cal-mode-week")) A.$("#cal-mode-week").addEventListener("click", function () { setViewMode("week"); });
   if (A.$("#cal-mode-month")) A.$("#cal-mode-month").addEventListener("click", function () { setViewMode("month"); });
   if (A.$("#week-copy")) A.$("#week-copy").addEventListener("click", copyWeek);
+  if (A.$("#week-download")) A.$("#week-download").addEventListener("click", downloadPeriod);
   A.$("#week-plan-form").addEventListener("submit", onPlanWeek);
 
   A.onShow("calendario", renderCalendar);
