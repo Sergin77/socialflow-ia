@@ -362,7 +362,7 @@ const SFGenerator = (function () {
     const reel = lastReels[Number(btn.dataset.index)];
     if (!reel) return;
 
-    if (btn.dataset.reelAction === "copy") A.copyText(reelAsText(reel));
+    if (btn.dataset.reelAction === "copy") A.copyText(reelAsText(reel), btn);
     if (btn.dataset.reelAction === "save") {
       A.openPostModal({
         title: "Reels: " + reel.title,
@@ -384,11 +384,11 @@ const SFGenerator = (function () {
   /* ---------- Ligando os botões ---------- */
   A.$("#caption-form").addEventListener("submit", onCaptionSubmit);
   A.$("#caption-copy").addEventListener("click", function () {
-    if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult));
+    if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult), this);
   });
   if (A.$("#caption-copy-top")) {
     A.$("#caption-copy-top").addEventListener("click", function () {
-      if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult));
+      if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult), this);
     });
   }
   A.$("#caption-output").addEventListener("click", function (event) {
@@ -396,7 +396,7 @@ const SFGenerator = (function () {
     if (!btn || !lastCaptionResult) return;
     const fields = [lastCaptionResult.title, lastCaptionResult.caption, lastCaptionResult.cta, lastCaptionResult.hashtags, lastCaptionResult.visual];
     const value = fields[Number(btn.dataset.copyBlock)];
-    if (value) A.copyText(value);
+    if (value) A.copyText(value, btn);
   });
   function findNextOpenDate() {
     const usedDates = new Set(
