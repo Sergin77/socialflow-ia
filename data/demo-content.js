@@ -112,10 +112,14 @@ const DEMO_CONTENT = {
 
   /* ---------- Redes sociais e como chamar para a ação em cada uma ---------- */
   platforms: [
-    { id: "Instagram", label: "Instagram", channel: "pelo link da bio" },
-    { id: "Facebook", label: "Facebook", channel: "pelo botão de mensagem da página" },
-    { id: "TikTok", label: "TikTok", channel: "pelo link no perfil" },
-    { id: "LinkedIn", label: "LinkedIn", channel: "pelo contato do nosso perfil" }
+    { id: "Instagram", label: "Instagram", channel: "pelo link da bio",
+      tip: "Feed: 1:1 ou 4:5 · Stories: 9:16. Capriche nos primeiros 125 caracteres e direcione o link para a bio." },
+    { id: "Facebook", label: "Facebook", channel: "pelo botão de mensagem da página",
+      tip: "Imagens nítidas ou perguntas abertas geram boa conversa. Você pode colar links direto no texto." },
+    { id: "TikTok", label: "TikTok", channel: "pelo link no perfil",
+      tip: "Vídeos verticais (9:16). Prenda a atenção nos primeiros 3 segundos e use legendas curtas." },
+    { id: "LinkedIn", label: "LinkedIn", channel: "pelo contato do nosso perfil",
+      tip: "Tom mais profissional e educativo. Quebre o texto em parágrafos curtos para facilitar a leitura." }
   ],
 
   /* ---------- Formatos ---------- */
