@@ -30,6 +30,26 @@
   --fonte: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
 }
 
+/* Tema Claro opcional (para leitura sob luz forte) */
+html[data-theme="light"] {
+  --azul-marinho: #F4F6FB;
+  --texto: #10172A;
+  --texto-2: #475569;
+  --superficie: #FFFFFF;
+  --superficie-2: #EEF2F8;
+  --borda: #CBD5E1;
+  --sombra: 0 10px 30px rgba(16, 23, 42, 0.08);
+}
+html[data-theme="light"] .section-alt,
+html[data-theme="light"] .sidebar { background: #E9EEF7; }
+html[data-theme="light"] .site-header { background: rgba(244, 246, 251, 0.9); }
+html[data-theme="light"] .topbar { background: rgba(244, 246, 251, 0.92); }
+html[data-theme="light"] .tag { background: rgba(113, 92, 245, 0.14); color: #5A46D6; }
+html[data-theme="light"] .tag-blue { background: rgba(69, 184, 245, 0.18); color: #0284C7; }
+html[data-theme="light"] .ig-preview { background: #FFFFFF; }
+html[data-theme="light"] .ig-media { color: #F5F7FC; }
+html[data-theme="light"] .ig-media-hint { color: #CBD5E1; }
+
 /* ---------- 2. BASE (regras gerais) ---------- */
 *,
 *::before,
