@@ -10,7 +10,7 @@
 
 const SFApp = (function () {
   const D = DEMO_CONTENT;
-  const VIEWS = ["dashboard", "empresa", "legendas", "reels", "card", "calendario", "historico", "configuracoes"];
+  const VIEWS = ["dashboard", "empresa", "legendas", "reels", "card", "respostas", "calendario", "historico", "configuracoes"];
   const renderers = {};      // funções que desenham cada tela
   let currentView = "dashboard";
   let loadingRemote = false;
