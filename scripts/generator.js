@@ -241,6 +241,14 @@ const SFGenerator = (function () {
     return r.title + "\n\n" + r.caption + "\n\n" + r.cta + "\n\n" + r.hashtags;
   }
 
+  function updatePlatformTip() {
+    const tipEl = A.$("#cap-platform-tip");
+    const selectEl = A.$("#cap-platform");
+    if (!tipEl || !selectEl) return;
+    const found = D.platforms.find(function (p) { return p.id === selectEl.value; });
+    tipEl.textContent = found && found.tip ? "💡 " + found.tip : "";
+  }
+
   function renderCaptionView() {
     const business = SFStore.getBusiness();
     if (business) {
@@ -249,6 +257,7 @@ const SFGenerator = (function () {
     }
     setDefault("cap-platform", SFStore.getSettings().defaultPlatform);
     setDefault("cap-format", "feed");
+    updatePlatformTip();
   }
 
   /* =====================================================
@@ -383,6 +392,7 @@ const SFGenerator = (function () {
 
   /* ---------- Ligando os botões ---------- */
   A.$("#caption-form").addEventListener("submit", onCaptionSubmit);
+  if (A.$("#cap-platform")) A.$("#cap-platform").addEventListener("change", updatePlatformTip);
   A.$("#caption-copy").addEventListener("click", function () {
     if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult), this);
   });
