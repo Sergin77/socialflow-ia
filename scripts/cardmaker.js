@@ -28,6 +28,21 @@ const SFCardMaker = (function () {
   function drawCard() {
     const canvas = A.$("#card-canvas");
     if (!canvas) return;
+    const format = (A.$("#card-format") && A.$("#card-format").value) || "feed";
+    const isStories = format === "stories";
+    canvas.width = 1080;
+    canvas.height = isStories ? 1920 : 1080;
+    canvas.classList.toggle("is-stories", isStories);
+
+    const dlBtn = A.$("#card-download");
+    if (dlBtn) dlBtn.textContent = isStories ? "⬇️ Baixar PNG (1080×1920)" : "⬇️ Baixar PNG (1080×1080)";
+    const sizeLabel = A.$("#card-size-label");
+    if (sizeLabel) {
+      sizeLabel.textContent = isStories
+        ? "Prévia ao vivo em 1080×1920 (formato Stories 9:16)."
+        : "Prévia ao vivo em 1080×1080 (formato feed Instagram).";
+    }
+
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
     const H = canvas.height;
@@ -82,13 +97,13 @@ const SFCardMaker = (function () {
     ctx.fillStyle = "#45B8F5";
     ctx.font = "700 28px Inter, Arial, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(brand.toUpperCase(), W / 2, 140);
+    ctx.fillText(brand.toUpperCase(), W / 2, isStories ? 220 : 140);
 
     // 4. Título central com quebra de linha automática
     ctx.fillStyle = "#F5F7FC";
-    ctx.font = "800 64px Inter, Arial, sans-serif";
-    const titleLines = wrapLines(ctx, title, W - 200).slice(0, 5);
-    const lineHeight = 78;
+    ctx.font = isStories ? "800 72px Inter, Arial, sans-serif" : "800 64px Inter, Arial, sans-serif";
+    const titleLines = wrapLines(ctx, title, W - 200).slice(0, 6);
+    const lineHeight = isStories ? 88 : 78;
     const startY = H / 2 - ((titleLines.length - 1) * lineHeight) / 2;
     titleLines.forEach(function (line, i) {
       ctx.fillText(line, W / 2, startY + i * lineHeight);
@@ -99,7 +114,7 @@ const SFCardMaker = (function () {
       ctx.font = "600 32px Inter, Arial, sans-serif";
       const subWidth = Math.min(W - 180, ctx.measureText(subtitle).width + 80);
       const pillX = (W - subWidth) / 2;
-      const pillY = H - 230;
+      const pillY = isStories ? H - 340 : H - 230;
       ctx.fillStyle = "rgba(113, 92, 245, 0.9)";
       ctx.beginPath();
       ctx.roundRect(pillX, pillY, subWidth, 72, 36);
@@ -140,10 +155,11 @@ const SFCardMaker = (function () {
     const canvas = A.$("#card-canvas");
     if (!canvas) return;
     const link = document.createElement("a");
-    link.download = "socialflow-card.png";
+    const isStories = (A.$("#card-format") && A.$("#card-format").value) === "stories";
+    link.download = isStories ? "socialflow-stories.png" : "socialflow-card.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
-    A.toast("Card baixado em PNG (1080×1080)!", "success");
+    A.toast(isStories ? "Card Stories baixado (1080×1920)!" : "Card baixado em PNG (1080×1080)!", "success");
   }
 
   function renderCardView() {
@@ -161,6 +177,17 @@ const SFCardMaker = (function () {
       el.addEventListener("change", drawCard);
     }
   });
+  if (A.$("#card-format-tabs")) {
+    A.$("#card-format-tabs").addEventListener("click", function (event) {
+      const btn = event.target.closest("[data-format]");
+      if (!btn) return;
+      A.$("#card-format").value = btn.dataset.format;
+      A.$all("#card-format-tabs .tab").forEach(function (el) {
+        el.classList.toggle("active", el === btn);
+      });
+      drawCard();
+    });
+  }
   if (A.$("#card-swatches")) {
     A.$("#card-swatches").addEventListener("click", function (event) {
       const btn = event.target.closest(".theme-swatch");
