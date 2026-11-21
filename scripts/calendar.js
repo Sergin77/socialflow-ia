@@ -253,6 +253,34 @@
     A.toast("Calendário baixado em .txt!", "success");
   }
 
+  function downloadPeriodCsv() {
+    const days = getPeriodDays();
+    const posts = SFStore.getPosts();
+    const rows = [["Data", "Tipo", "Rede", "Status", "Titulo", "Legenda", "CTA", "Hashtags"]];
+    const esc = function (v) { return '"' + String(v || "").replace(/"/g, '""') + '"'; };
+    let count = 0;
+    days.forEach(function (d) {
+      const iso = A.toISODate(d);
+      posts.filter(function (p) { return p.scheduled_for === iso; }).forEach(function (p) {
+        count++;
+        rows.push([iso, A.typeLabel(p.content_type), p.platform, A.statusLabel(p.status), p.title, p.caption, p.cta, p.hashtags]);
+      });
+    });
+    if (!count) {
+      A.toast("Nenhum conteúdo agendado neste período para baixar.", "error");
+      return;
+    }
+    const csv = "\uFEFF" + rows.map(function (r) { return r.map(esc).join(";"); }).join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "socialflow-calendario.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+    A.toast("Calendário baixado em .csv!", "success");
+  }
+
   A.$("#calendar-week").addEventListener("click", onCalendarClick);
   A.$("#week-prev").addEventListener("click", function () { changePeriod(-7); });
   A.$("#week-next").addEventListener("click", function () { changePeriod(7); });
@@ -261,6 +289,7 @@
   if (A.$("#cal-mode-month")) A.$("#cal-mode-month").addEventListener("click", function () { setViewMode("month"); });
   if (A.$("#week-copy")) A.$("#week-copy").addEventListener("click", copyWeek);
   if (A.$("#week-download")) A.$("#week-download").addEventListener("click", downloadPeriod);
+  if (A.$("#week-download-csv")) A.$("#week-download-csv").addEventListener("click", downloadPeriodCsv);
   A.$("#week-plan-form").addEventListener("submit", onPlanWeek);
 
   A.onShow("calendario", renderCalendar);
