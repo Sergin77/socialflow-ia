@@ -57,9 +57,17 @@
     <section class="view" id="view-dashboard" data-title="Dashboard">
       <p class="view-intro">Resumo do seu marketing nesta semana.</p>
 
-      <div class="notice notice-warning hidden" id="dash-no-business">
-        Você ainda não cadastrou sua empresa.
-        <a href="#empresa">Cadastrar agora →</a>
+      <div class="card hidden" id="dash-no-business" style="border-color: var(--roxo);">
+        <div class="card-header">
+          <h2>👋 Primeiros passos para começar</h2>
+          <span class="tag">Leva menos de 1 minuto</span>
+        </div>
+        <p class="muted" style="margin-bottom: 14px;">
+          <strong>1.</strong> Cadastre os dados da sua empresa →
+          <strong>2.</strong> Gere sua primeira legenda ou ideia de Reels →
+          <strong>3.</strong> Organize no calendário.
+        </p>
+        <a href="#empresa" class="btn btn-primary btn-sm">1º passo: Cadastrar minha empresa →</a>
       </div>
 
       <div class="stats">
@@ -195,6 +203,15 @@
             <label for="cap-format">Formato <span class="required">*</span></label>
             <select id="cap-format" name="format"><option value="">Selecione…</option></select>
             <span class="field-error" data-error-for="cap-format"></span>
+          </div>
+
+          <div class="field field-full">
+            <label for="cap-length">Tamanho da legenda</label>
+            <select id="cap-length" name="length">
+              <option value="curta">Curta (direta ao ponto)</option>
+              <option value="media" selected>Média (equilibrada)</option>
+              <option value="detalhada">Detalhada (mais completa)</option>
+            </select>
           </div>
         </div>
 
