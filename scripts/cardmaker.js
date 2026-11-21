@@ -161,6 +161,17 @@ const SFCardMaker = (function () {
       el.addEventListener("change", drawCard);
     }
   });
+  if (A.$("#card-swatches")) {
+    A.$("#card-swatches").addEventListener("click", function (event) {
+      const btn = event.target.closest(".theme-swatch");
+      if (!btn) return;
+      A.$("#card-theme").value = btn.dataset.theme;
+      A.$all("#card-swatches .theme-swatch").forEach(function (el) {
+        el.classList.toggle("active", el === btn);
+      });
+      drawCard();
+    });
+  }
   if (A.$("#card-photo")) A.$("#card-photo").addEventListener("change", onPhotoChange);
   if (A.$("#card-clear-photo")) {
     A.$("#card-clear-photo").addEventListener("click", function () {
