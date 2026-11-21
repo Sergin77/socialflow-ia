@@ -428,11 +428,27 @@ img {
 .cta-final .lead { margin: 0 auto 28px; }
 
 .site-footer {
-  padding: 32px 0;
+  padding: 36px 0;
   border-top: 1px solid var(--borda);
-  text-align: center;
 }
 .site-footer p { margin: 0 0 6px; }
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.footer-links a {
+  color: var(--texto-2);
+  font-size: 0.9rem;
+}
+.footer-links a:hover { color: var(--texto); }
 
 /* =========================================================
    PARTE B — APLICAÇÃO (app.html)
@@ -601,8 +617,36 @@ img {
   background: var(--superficie);
   border: 1px solid var(--borda);
   border-radius: var(--raio);
+  position: relative;
+  overflow: hidden;
 }
-.stat-label { margin: 0 0 6px; color: var(--texto-2); font-size: 0.85rem; }
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--gradiente);
+  opacity: 0.65;
+}
+.stat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.stat-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(113, 92, 245, 0.15);
+  color: var(--azul);
+  flex-shrink: 0;
+}
+.stat-icon svg { width: 16px; height: 16px; }
+.stat-label { margin: 0; color: var(--texto-2); font-size: 0.85rem; }
 .stat-value { margin: 0; font-size: 1.9rem; font-weight: 800; }
 
 .shortcuts { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -962,6 +1006,36 @@ input:focus, select:focus, textarea:focus {
   gap: 24px;
   align-items: start;
 }
+.theme-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.theme-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--superficie-2);
+  color: var(--texto-2);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.theme-swatch.active {
+  border-color: var(--roxo);
+  color: var(--texto);
+  box-shadow: 0 0 0 2px rgba(113, 92, 245, 0.25);
+}
+.swatch-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
 .card-canvas-wrap {
   display: flex;
   flex-direction: column;
@@ -1150,7 +1224,7 @@ input:focus, select:focus, textarea:focus {
 
 @media (max-width: 900px) {
   /* Landing: barra de navegação rápida no celular */
-  .header-inner { flex-wrap: wrap; height: auto; padding: 12px 0; gap: 10px; }
+  .header-inner { flex-wrap: wrap; height: auto; padding: 12px 20px; gap: 10px; }
   .site-nav {
     order: 3;
     width: 100%;
