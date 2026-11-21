@@ -114,9 +114,14 @@ const SFGenerator = (function () {
     const productTag = slugTag(input.product);
     if (productTag.length > 2 && !tags.includes(productTag)) tags.push(productTag);
 
+    let captionText = fill(template.caption, vars) + "\n\n" + pick(tone.closings);
+    if (input.length === "curta") {
+      captionText = fill(template.caption, vars).split("\n\n")[0];
+    }
+
     return {
       title: fill(template.title, vars) + tone.emoji,
-      caption: fill(template.caption, vars) + "\n\n" + pick(tone.closings),
+      caption: captionText,
       cta: fill(pick(D.ctas[input.goal]), Object.assign({}, vars, { canal: platform.channel })),
       hashtags: tags.join(" "),
       visual: fill(format.visual, { visual: fill(pick(niche.visuals), vars) })
@@ -227,7 +232,8 @@ const SFGenerator = (function () {
       goal: A.$("#cap-goal").value,
       platform: A.$("#cap-platform").value,
       tone: A.$("#cap-tone").value,
-      format: A.$("#cap-format").value
+      format: A.$("#cap-format").value,
+      length: A.$("#cap-length") ? A.$("#cap-length").value : "media"
     });
   }
 
