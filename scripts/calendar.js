@@ -221,7 +221,7 @@
       A.toast("Nenhum conteúdo agendado nesta semana para copiar.", "error");
       return;
     }
-    A.copyText(lines.join("\n").trim());
+    A.copyText(lines.join("\n").trim(), A.$("#week-copy"));
   }
 
   A.$("#calendar-week").addEventListener("click", onCalendarClick);
