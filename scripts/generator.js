@@ -17,6 +17,8 @@ const SFGenerator = (function () {
   let lastCaptionTemplate = null; // último modelo usado (para variar)
   let lastCaptionResult = null;
   let lastReels = [];
+  let previewSlides = [];
+  let previewIndex = 0;
 
   /* ---------- Funções auxiliares ---------- */
 
@@ -154,26 +156,9 @@ const SFGenerator = (function () {
 
     const preview = A.$("#caption-preview");
     if (preview) {
-      const biz = SFStore.getBusiness();
-      const bizName = biz ? biz.name : "Sua Empresa";
-      const initials = bizName.trim().slice(0, 2).toUpperCase();
-      const platform = (lastCaptionInput && lastCaptionInput.platform) || "Instagram";
-      preview.innerHTML =
-        '<div class="ig-head">' +
-          '<span class="ig-avatar">' + A.escapeHtml(initials) + "</span>" +
-          '<span class="ig-user">' + A.escapeHtml(bizName) + ' <span class="muted" style="font-weight:400;">· ' + A.escapeHtml(platform) + "</span></span>" +
-        "</div>" +
-        '<div class="ig-media">' +
-          '<span class="ig-media-badge">Prévia visual</span>' +
-          '<p class="ig-media-title">' + A.escapeHtml(result.title) + "</p>" +
-          '<p class="ig-media-hint">' + A.escapeHtml(result.visual) + "</p>" +
-        "</div>" +
-        '<div class="ig-actions"><span>♡  💬  ➤</span><span>🔖</span></div>' +
-        '<div class="ig-body">' +
-          "<strong>" + A.escapeHtml(bizName) + "</strong> " + A.escapeHtml(result.caption) +
-          (result.cta ? "\n\n" + A.escapeHtml(result.cta) : "") +
-          (result.hashtags ? '<p class="ig-tags">' + A.escapeHtml(result.hashtags) + "</p>" : "") +
-        "</div>";
+      previewSlides = parseSlides(result);
+      previewIndex = 0;
+      renderPreviewBox(preview, result);
     }
 
     const waLink = A.$("#caption-whatsapp");
@@ -181,6 +166,70 @@ const SFGenerator = (function () {
 
     A.$("#caption-result").classList.remove("hidden");
     A.$("#caption-result").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function parseSlides(result) {
+    const format = (lastCaptionInput && lastCaptionInput.format) || "feed";
+    if (format !== "carrossel" && format !== "stories") {
+      return [{ label: "Prévia visual", title: result.title, text: result.visual }];
+    }
+
+    const parts = String(result.visual || "")
+      .split(/(?=\b(?:Slide|Card|Story)\s*\d+)/i)
+      .map(function (s) { return s.trim(); })
+      .filter(Boolean);
+
+    if (parts.length >= 2) {
+      return parts.map(function (p, i) {
+        const splitIdx = p.indexOf(":");
+        const heading = splitIdx > 0 ? p.slice(0, splitIdx).trim() : (format === "stories" ? "Story " : "Slide ") + (i + 1);
+        const body = splitIdx > 0 ? p.slice(splitIdx + 1).trim() : p;
+        return {
+          label: heading + " de " + parts.length,
+          title: i === 0 ? result.title : heading,
+          text: body
+        };
+      });
+    }
+
+    const firstSentence = String(result.caption || "").split(/\n+/)[0] || result.title;
+    return [
+      { label: "Slide 1 de 4 · Capa", title: result.title, text: "Capa chamativa do carrossel" },
+      { label: "Slide 2 de 4", title: "Ponto principal", text: firstSentence },
+      { label: "Slide 3 de 4", title: "Ideia visual", text: result.visual },
+      { label: "Slide 4 de 4 · CTA", title: "Chamada para ação", text: result.cta }
+    ];
+  }
+
+  function renderPreviewBox(preview, result) {
+    const biz = SFStore.getBusiness();
+    const bizName = biz ? biz.name : "Sua Empresa";
+    const initials = bizName.trim().slice(0, 2).toUpperCase();
+    const platform = (lastCaptionInput && lastCaptionInput.platform) || "Instagram";
+    const slide = previewSlides[previewIndex] || { label: "Prévia visual", title: result.title, text: result.visual };
+    const isCarousel = previewSlides.length > 1;
+
+    preview.innerHTML =
+      '<div class="ig-head">' +
+        '<span class="ig-avatar">' + A.escapeHtml(initials) + "</span>" +
+        '<span class="ig-user">' + A.escapeHtml(bizName) + ' <span class="muted" style="font-weight:400;">· ' + A.escapeHtml(platform) + "</span></span>" +
+      "</div>" +
+      '<div class="ig-media">' +
+        (isCarousel ? '<button type="button" class="ig-slide-btn prev" data-slide-dir="-1" aria-label="Slide anterior">‹</button>' : "") +
+        '<span class="ig-media-badge">' + A.escapeHtml(slide.label) + "</span>" +
+        '<p class="ig-media-title">' + A.escapeHtml(slide.title) + "</p>" +
+        '<p class="ig-media-hint">' + A.escapeHtml(slide.text) + "</p>" +
+        (isCarousel ? '<button type="button" class="ig-slide-btn next" data-slide-dir="1" aria-label="Próximo slide">›</button>' : "") +
+        (isCarousel ? '<div class="ig-dots">' + previewSlides.map(function (_, i) {
+          return '<button type="button" class="ig-dot' + (i === previewIndex ? " active" : "") + '" data-slide-to="' + i + '" aria-label="Ir para slide ' + (i + 1) + '"></button>';
+        }).join("") + "</div>" : "") +
+      "</div>" +
+      '<div class="ig-actions"><span>♡  💬  ➤</span><span>🔖</span></div>' +
+      '<div class="ig-body">' +
+        "<strong>" + A.escapeHtml(bizName) + "</strong> " + A.escapeHtml(result.caption) +
+        (result.cta ? "\n\n" + A.escapeHtml(result.cta) : "") +
+        (result.hashtags ? '<p class="ig-tags">' + A.escapeHtml(result.hashtags) + "</p>" : "") +
+      "</div>";
   }
 
   async function runCaption(input) {
@@ -404,6 +453,20 @@ const SFGenerator = (function () {
   if (A.$("#caption-copy-top")) {
     A.$("#caption-copy-top").addEventListener("click", function () {
       if (lastCaptionResult) A.copyText(captionAsText(lastCaptionResult), this);
+    });
+  }
+  if (A.$("#caption-preview")) {
+    A.$("#caption-preview").addEventListener("click", function (event) {
+      if (!lastCaptionResult || previewSlides.length <= 1) return;
+      const dirBtn = event.target.closest("[data-slide-dir]");
+      const dotBtn = event.target.closest("[data-slide-to]");
+      if (dirBtn) {
+        previewIndex = (previewIndex + Number(dirBtn.dataset.slideDir) + previewSlides.length) % previewSlides.length;
+        renderPreviewBox(A.$("#caption-preview"), lastCaptionResult);
+      } else if (dotBtn) {
+        previewIndex = Number(dotBtn.dataset.slideTo);
+        renderPreviewBox(A.$("#caption-preview"), lastCaptionResult);
+      }
     });
   }
   A.$("#caption-output").addEventListener("click", function (event) {
