@@ -80,6 +80,21 @@ const SFSupabase = (function () {
     if (sb) await sb.auth.signOut();
   }
 
+  async function resetPassword(email) {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase não configurado.");
+    const redirectTo = window.location.href.split("#")[0];
+    const res = await sb.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
+    if (res.error) throw new Error(translateError(res.error));
+  }
+
+  async function updatePassword(newPassword) {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase não configurado.");
+    const res = await sb.auth.updateUser({ password: newPassword });
+    if (res.error) throw new Error(translateError(res.error));
+  }
+
   async function getUser() {
     const sb = getClient();
     if (!sb) return null;
@@ -300,7 +315,7 @@ const SFSupabase = (function () {
   }
 
   return {
-    isEnabled, isLoggedIn, signIn, signUp, signOut, getUser,
+    isEnabled, isLoggedIn, signIn, signUp, signOut, resetPassword, updatePassword, getUser,
     getMyBusiness, getMyBusinesses, saveMyBusiness, deleteMyBusiness, setActiveBusinessId,
     getPosts, createPost, updatePost, deletePost,
     generateWithAI, getUsageStatus, deleteAllMyData
