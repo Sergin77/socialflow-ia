@@ -233,13 +233,18 @@
             <span class="field-error" data-error-for="cap-format"></span>
           </div>
 
-          <div class="field field-full">
+          <div class="field">
             <label for="cap-length">Tamanho da legenda</label>
             <select id="cap-length" name="length">
               <option value="curta">Curta (direta ao ponto)</option>
               <option value="media" selected>Média (equilibrada)</option>
               <option value="detalhada">Detalhada (mais completa)</option>
             </select>
+          </div>
+
+          <div class="field">
+            <label for="cap-notes">Detalhe ou diferencial (opcional)</label>
+            <input id="cap-notes" name="notes" maxlength="140" placeholder="Ex.: sabor novo, horário livre na quinta">
           </div>
         </div>
 
@@ -266,6 +271,8 @@
           <button type="button" class="btn btn-secondary" id="caption-make-card">🎨 Criar Card</button>
           <button type="button" class="btn btn-secondary" id="caption-save">✏️ Editar e salvar</button>
           <button type="button" class="btn btn-ghost" id="caption-again">🔄 Outra versão</button>
+          <button type="button" class="btn btn-ghost" id="caption-shorter">✂️ Mais curta</button>
+          <button type="button" class="btn btn-ghost" id="caption-sales">🎯 Mais vendedora</button>
         </div>
       </div>
     </section>
@@ -294,6 +301,10 @@
             <label for="reel-product">Produto ou serviço em destaque <span class="required">*</span></label>
             <input id="reel-product" name="product" maxlength="60" placeholder="Ex.: hidratação capilar">
             <span class="field-error" data-error-for="reel-product"></span>
+          </div>
+          <div class="field field-full">
+            <label for="reel-notes">Detalhe ou diferencial (opcional)</label>
+            <input id="reel-notes" name="notes" maxlength="140" placeholder="Ex.: mostrar bastidores da equipe, foco em fim de semana">
           </div>
         </div>
         <div class="form-actions">
