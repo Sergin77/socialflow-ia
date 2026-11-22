@@ -233,7 +233,8 @@ const SFGenerator = (function () {
       platform: A.$("#cap-platform").value,
       tone: A.$("#cap-tone").value,
       format: A.$("#cap-format").value,
-      length: A.$("#cap-length") ? A.$("#cap-length").value : "media"
+      length: A.$("#cap-length") ? A.$("#cap-length").value : "media",
+      notes: A.$("#cap-notes") ? A.$("#cap-notes").value.trim() : ""
     });
   }
 
@@ -333,7 +334,8 @@ const SFGenerator = (function () {
     const input = {
       niche: A.$("#reel-niche").value,
       goal: A.$("#reel-goal").value,
-      product: A.$("#reel-product").value.trim()
+      product: A.$("#reel-product").value.trim(),
+      notes: A.$("#reel-notes") ? A.$("#reel-notes").value.trim() : ""
     };
 
     if (typeof SFSupabase !== "undefined" && SFSupabase.isLoggedIn()) {
@@ -458,8 +460,32 @@ const SFGenerator = (function () {
     });
   }
   A.$("#caption-again").addEventListener("click", function () {
-    if (lastCaptionInput) runCaption(lastCaptionInput);
+    if (!lastCaptionInput) return;
+    runCaption(Object.assign({}, lastCaptionInput, {
+      avoidTitle: lastCaptionResult ? lastCaptionResult.title : "",
+      refine: ""
+    }));
   });
+  if (A.$("#caption-shorter")) {
+    A.$("#caption-shorter").addEventListener("click", function () {
+      if (!lastCaptionInput) return;
+      runCaption(Object.assign({}, lastCaptionInput, {
+        length: "curta",
+        avoidTitle: lastCaptionResult ? lastCaptionResult.title : "",
+        refine: "Deixe o texto bem mais curto, direto ao ponto e fácil de ler rápido"
+      }));
+    });
+  }
+  if (A.$("#caption-sales")) {
+    A.$("#caption-sales").addEventListener("click", function () {
+      if (!lastCaptionInput) return;
+      runCaption(Object.assign({}, lastCaptionInput, {
+        goal: "vender",
+        avoidTitle: lastCaptionResult ? lastCaptionResult.title : "",
+        refine: "Use um tom mais focado em despertar interesse e convidar o cliente para agir, sem inventar preços ou descontos"
+      }));
+    });
+  }
   A.$("#reels-form").addEventListener("submit", onReelsSubmit);
   A.$("#reels-output").addEventListener("click", onReelsClick);
 
