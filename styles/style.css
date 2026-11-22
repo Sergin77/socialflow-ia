@@ -850,8 +850,9 @@ input:focus, select:focus, textarea:focus {
 }
 .ig-user { font-size: 0.85rem; font-weight: 700; }
 .ig-media {
-  padding: 28px 20px;
-  min-height: 180px;
+  position: relative;
+  padding: 28px 40px;
+  min-height: 190px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -862,6 +863,41 @@ input:focus, select:focus, textarea:focus {
     #141d36;
   border-bottom: 1px solid var(--borda);
 }
+.ig-slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(16, 23, 42, 0.72);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.ig-slide-btn:hover { border-color: var(--azul); }
+.ig-slide-btn.prev { left: 8px; }
+.ig-slide-btn.next { right: 8px; }
+.ig-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.ig-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+}
+.ig-dot.active { background: var(--azul); transform: scale(1.2); }
 .ig-media-badge {
   align-self: center;
   margin-bottom: 10px;
