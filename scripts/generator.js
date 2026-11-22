@@ -176,6 +176,9 @@ const SFGenerator = (function () {
         "</div>";
     }
 
+    const waLink = A.$("#caption-whatsapp");
+    if (waLink) waLink.href = "https://wa.me/?text=" + encodeURIComponent(captionAsText(result));
+
     A.$("#caption-result").classList.remove("hidden");
     A.$("#caption-result").scrollIntoView({ behavior: "smooth", block: "start" });
   }
