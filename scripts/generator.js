@@ -486,6 +486,26 @@ const SFGenerator = (function () {
       }));
     });
   }
+  if (A.$("#caption-tip")) {
+    A.$("#caption-tip").addEventListener("click", function () {
+      if (!lastCaptionInput) return;
+      runCaption(Object.assign({}, lastCaptionInput, {
+        goal: "educar",
+        avoidTitle: lastCaptionResult ? lastCaptionResult.title : "",
+        refine: "Transforme em um post educativo com 1 dica prática e útil para o cliente salvar e compartilhar"
+      }));
+    });
+  }
+  if (A.$("#caption-behind")) {
+    A.$("#caption-behind").addEventListener("click", function () {
+      if (!lastCaptionInput) return;
+      runCaption(Object.assign({}, lastCaptionInput, {
+        goal: "engajar",
+        avoidTitle: lastCaptionResult ? lastCaptionResult.title : "",
+        refine: "Escreva no estilo bastidores do dia a dia da equipe, humano e próximo, mostrando o cuidado por trás do serviço/produto"
+      }));
+    });
+  }
   A.$("#reels-form").addEventListener("submit", onReelsSubmit);
   A.$("#reels-output").addEventListener("click", onReelsClick);
 
