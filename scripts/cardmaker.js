@@ -52,6 +52,7 @@ const SFCardMaker = (function () {
     const biz = SFStore.getBusiness();
     const brand = (A.$("#card-brand").value || "").trim() || (biz ? biz.name : "SocialFlow AI");
     const theme = A.$("#card-theme").value || "brand";
+    const customColor = (A.$("#card-custom-color") && A.$("#card-custom-color").value) || "#E11D48";
 
     // 1. Fundo (gradiente ou foto enviada)
     if (uploadedImage) {
@@ -72,6 +73,9 @@ const SFCardMaker = (function () {
         grad.addColorStop(1, "#1E293B");
       } else if (theme === "purple") {
         grad.addColorStop(0, "#5A46D6");
+        grad.addColorStop(1, "#10172A");
+      } else if (theme === "custom") {
+        grad.addColorStop(0, customColor);
         grad.addColorStop(1, "#10172A");
       } else {
         grad.addColorStop(0, "#715CF5");
@@ -115,7 +119,7 @@ const SFCardMaker = (function () {
       const subWidth = Math.min(W - 180, ctx.measureText(subtitle).width + 80);
       const pillX = (W - subWidth) / 2;
       const pillY = isStories ? H - 340 : H - 230;
-      ctx.fillStyle = "rgba(113, 92, 245, 0.9)";
+      ctx.fillStyle = theme === "custom" ? customColor : "rgba(113, 92, 245, 0.9)";
       ctx.beginPath();
       ctx.roundRect(pillX, pillY, subWidth, 72, 36);
       ctx.fill();
@@ -196,6 +200,15 @@ const SFCardMaker = (function () {
       A.$("#card-theme").value = btn.dataset.theme;
       A.$all("#card-swatches .theme-swatch").forEach(function (el) {
         el.classList.toggle("active", el === btn);
+      });
+      drawCard();
+    });
+  }
+  if (A.$("#card-custom-color")) {
+    A.$("#card-custom-color").addEventListener("input", function () {
+      A.$("#card-theme").value = "custom";
+      A.$all("#card-swatches .theme-swatch").forEach(function (el) {
+        el.classList.toggle("active", el.dataset.theme === "custom");
       });
       drawCard();
     });
