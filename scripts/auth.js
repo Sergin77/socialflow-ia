@@ -12,6 +12,8 @@
   const tabRegister = document.getElementById("tab-register");
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
+  const recoveryForm = document.getElementById("recovery-form");
+  const forgotBtn = document.getElementById("forgot-password-btn");
   const modeNotice = document.getElementById("auth-mode-notice");
   const useSupabase = typeof SFSupabase !== "undefined" && SFSupabase.isEnabled();
 
@@ -24,6 +26,15 @@
     if (loginBtn) loginBtn.textContent = "Entrar";
     const regBtn = registerForm.querySelector('button[type="submit"]');
     if (regBtn) regBtn.textContent = "Criar conta";
+  }
+
+  if (useSupabase && window.location.hash.includes("type=recovery") && recoveryForm) {
+    const tabs = document.querySelector(".auth-card .tabs");
+    if (tabs) tabs.classList.add("hidden");
+    loginForm.classList.add("hidden");
+    registerForm.classList.add("hidden");
+    recoveryForm.classList.remove("hidden");
+    if (modeNotice) modeNotice.innerHTML = "🔑 <strong>Redefinir senha:</strong> digite sua nova senha abaixo.";
   }
 
   function toast(message, type) {
@@ -174,4 +185,49 @@
     toast("Conta simulada criada! Abrindo o painel…", "success");
     setTimeout(function () { window.location.href = "app.html"; }, 500);
   });
+
+  if (forgotBtn) {
+    forgotBtn.addEventListener("click", async function () {
+      const ok = validateFields([
+        { id: "login-email", required: "Digite seu e-mail acima primeiro.", email: true }
+      ]);
+      if (!ok) return;
+
+      if (!useSupabase) {
+        toast("No modo demonstração não há senha real. Pode entrar com qualquer senha de 6+ caracteres.", "success");
+        return;
+      }
+      forgotBtn.disabled = true;
+      try {
+        await SFSupabase.resetPassword(document.getElementById("login-email").value.trim());
+        toast("E-mail de recuperação enviado! Confira sua caixa de entrada e spam.", "success");
+      } catch (err) {
+        toast(err.message, "error");
+      } finally {
+        forgotBtn.disabled = false;
+      }
+    });
+  }
+
+  if (recoveryForm) {
+    recoveryForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const ok = validateFields([
+        { id: "rec-password", required: "Informe a nova senha.", min: 6 },
+        { id: "rec-confirm", required: "Confirme a nova senha.", matchId: "rec-password" }
+      ]);
+      if (!ok) return;
+
+      const btn = recoveryForm.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        await SFSupabase.updatePassword(document.getElementById("rec-password").value);
+        toast("Senha atualizada! Entrando no painel…", "success");
+        setTimeout(function () { window.location.href = "app.html"; }, 600);
+      } catch (err) {
+        toast(err.message, "error");
+        btn.disabled = false;
+      }
+    });
+  }
 })();
