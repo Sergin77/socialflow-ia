@@ -50,8 +50,31 @@
         </div>
       </div>
 
+      <p style="text-align: right; margin: 6px 0 0;">
+        <button type="button" class="btn-copy-inline" id="forgot-password-btn">Esqueci minha senha</button>
+      </p>
+
       <div class="form-actions">
         <button type="submit" class="btn btn-primary btn-full">Entrar na demonstração</button>
+      </div>
+    </form>
+
+    <!-- Formulário: Redefinir nova senha (após clicar no link do e-mail) -->
+    <form id="recovery-form" class="hidden" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="rec-password">Nova senha <span class="required">*</span></label>
+          <input type="password" id="rec-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <span class="field-error" data-error-for="rec-password"></span>
+        </div>
+        <div class="field">
+          <label for="rec-confirm">Confirmar nova senha <span class="required">*</span></label>
+          <input type="password" id="rec-confirm" placeholder="Repita a nova senha" autocomplete="new-password">
+          <span class="field-error" data-error-for="rec-confirm"></span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-full">Salvar nova senha</button>
       </div>
     </form>
 
