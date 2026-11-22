@@ -53,7 +53,7 @@
 
   function renderReplies() {
     const biz = SFStore.getBusiness();
-    const bizName = biz ? biz.name : "nossa equipe";
+    const bizName = biz ? biz.name : "nossa empresa";
     const tone = biz ? biz.tone : "profissional";
     const list = A.$("#replies-list");
     if (!list) return;
